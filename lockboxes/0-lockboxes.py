@@ -26,7 +26,8 @@ def canUnlockAll(boxes: list) -> bool:
     #   5) Then we just pop a task from list, explore related cell's content,
     #      and add new tasks if the found keys don't match already visited ones
 
-    boxes_to_explore = [0]
+    boxes_to_explore = set()
+    boxes_to_explore.add(0)
     visited_boxes = set()
     visited_boxes.add(0)  # First box of index 0 is visited
     invalid_keys = set()
@@ -41,7 +42,8 @@ def canUnlockAll(boxes: list) -> bool:
                 try:
                     boxes[key]
                     # Won't be executed if was out of range
-                    boxes_to_explore.append(key)
+                    # Warning: list -> append, Set -> add
+                    boxes_to_explore.add(key)
                 except Exception as e:
                     invalid_keys.add(key)
         visited_boxes.add(key_of_next_box)
