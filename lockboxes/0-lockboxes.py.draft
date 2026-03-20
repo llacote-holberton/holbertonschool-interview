@@ -1,0 +1,70 @@
+def canUnlockAll(boxes: list) -> bool:
+    # First guard clauses
+    # Not a list = cannot process
+    if not (isinstance(boxes, list)):
+        print("@dev: Boxes is NOT a list")
+        return False
+    # Empty box or single cell = success
+    # (because of rule "first cell is always unlocked")
+    if len(boxes) < 2:
+        print("@dev: Boxes has 0 or 1 element nothing to check")
+        return True
+
+    # Base logic is: must explore cells of the list's "1st level",
+    #   each time checking its content.
+    #   if content is a "new" key, add to collection of keys.
+    #   if it is used, skip.
+    # Question: WHEN to explore the new cell for which we just found key?
+
+    # Current box is the one we explore. Because "cell 0 always unlocked"
+    # we can initialize it directly...
+    # If it is NOT empty AND its content is a list instance.
+    # Let's define a mini helper for that.
+    def exploitable_content(box_content) -> bool:
+        return (isinstance(box_content, list) and len(box_content) > 0)
+
+    if not exploitable_content(boxes[0]):
+        print("@dev First boxes's subbox has no exploitable content")
+        return False
+    
+    current_box__content = boxes[0]
+    unlocked_count = 1
+    # We will define two Sets.
+    # One for keys_found and one for keys_used.
+    keys_found = set()
+    keys_used = set()
+
+    # DEV MODE PRINTS
+    print(f"Starting process for list {boxes}")
+    print(f"Starting with empty 'found' registry: {keys_found}")
+    print(f"Starting with empty 'used' registry: {keys_used}")
+    print(f"Starting with unlocked counter at 1: {unlocked_count}")
+    print(f"First box has this: {current_box__content}")
+
+    # There is probably a better condition for the loop but for now
+    #   let's go with explicit break inside
+    while (current_box__content):
+        for value in current_box__content:
+            if value not in keys_found: keys_found.add(value)
+        # Warning do not mix "difference" (-) and symetric difference (^)
+        keys_to_try = keys_found ^ keys_used
+        for key in (keys_to_try):
+            print(f"@dev: trying unchecked key {key}")
+            try:
+                current_box__content = boxes[key]
+                # Should not be executed if index was out of range
+                print(f"@dev: found value {current_box__content}")
+                # How to dig or leave depending on whether single content?
+            except Exception as e:
+                print(e)
+                current_box__content = False
+            finally:
+                keys_used.add(key)
+        unlocked_count += 1
+        #print(f"Hello: {unlocked_count}")
+        
+    # Using super practical but hard to memorize syntax for "set comprehension"
+    # Read: "put i in index for each value variation of i in generated list"
+    boxes_indexs = {i for i in range(len(boxes))}
+    print(f"@dev: here is the boxes list of indexes: {boxes_indexs}")
+    return boxes_indexs <= keys_found
