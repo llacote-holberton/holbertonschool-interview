@@ -58,4 +58,16 @@ if __name__ == "__main__":
     print(f"Devil case 666, expected 45; returned? {minOperations(666)}")
     print(f"Lucky case 777, expected 47; returned? {minOperations(777)}")
 
-    print("")
+    # NOTE: pasting here a skeleton suggested by AI to make test code
+    #   more readable / maintenable / extensible...
+    tests = {
+        1: 0,
+        2: 2,
+        # Etc...
+        72: 12,
+        # You got it
+        777: 47
+    }
+    # NOTE: drawback of this in current state is no message on success.
+    for n, expected in tests.items():
+        assert minOperations(n) == expected, f"Failed for {n}"
