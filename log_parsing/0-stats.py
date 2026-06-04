@@ -53,25 +53,10 @@ def get_log_info(line: string) -> False|(error_code, file_size):
         return False
 
 
-# TEST
-print("========== START DEV DEBUG PHASE ============")
-
-test_line = '124.132.23.8 - [2026-06-04 14:56:51.894413] "GET /projects/260 HTTP/1.1" 405 234'
-log_expected_pattern__assembled = get_expected_log_pattern()
-print(log_expected_pattern__assembled)
-parse_result_2 = re.search(log_expected_pattern__assembled, test_line)
-print(parse_result_2.string)
-print("Group 0:", parse_result_2.group(0))
-print("Group 1:", parse_result_2.group(1))
-print("Group 2:", parse_result_2.group(2))
-print("Group HTTP CODE", parse_result_2.group("http_code"))
-
-test_line_invalid = "TOTO"
-log_expected_pattern = get_expected_log_pattern()
-
-get_log_info(test_line_invalid)
-
-print("========== END DEV DEBUG PHASE ============")
+def print_current_summary():
+    print(f"File size: {file_size}")
+    for code, count in sorted(http_codes_counts.items()):
+        print(f"{code}: {count}")
 
 
 if __name__ == "__main__":
@@ -85,11 +70,20 @@ if __name__ == "__main__":
         for line in sys.stdin:
             # print("This is the line read:\n", line)
             log_line_info = get_log_info(line)
-            print(log_line_info)
+            lines_read += 1
+            # print(log_line_info)
+            if isinstance(log_line_info, tuple):
+                code = log_line_info[0]
+                size = log_line_info[1]
+                http_codes_counts[code] += 1
+                file_size += size
+            if lines_read % 10 == 0:
+                print_current_summary()
     except KeyboardInterrupt:
         pass
     finally:
-        print("End of script")
+        print_current_summary()
+        # print("End of script")
 #
 # === Chosen architecture for v1 ===
 #
