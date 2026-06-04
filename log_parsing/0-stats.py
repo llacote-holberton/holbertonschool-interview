@@ -2,7 +2,7 @@
 """ Script parsing provided log input to aggregate number of HTTP errors"""
 
 import sys  # Required to read standard input either interactive or not.
-
+import re   # Required to parse strings with Regular Expressions
 
 # GOAL: provide perpettually updated summary of log file size and
 #   aggregate count of identified HTTP error codes.
@@ -10,13 +10,80 @@ import sys  # Required to read standard input either interactive or not.
 # - New output should be displayed every 10 lines or when process ends.
 # - Lines not respecting expected format will be "skipped" (but counted).
 
+# GLOBAL VARIABLES
+# 1. Set defining the only HTTP codes we are interested in.
+#    Using set on purpose to stress unicity and facilitate validation.
+supported_http_codes = {200, 301, 400, 401, 403, 404, 405, 500}
+# 2. Initializing the counters
+http_codes_counts = dict.fromkeys(supported_http_codes, 0)
+# 3. Initializing the file size
+file_size = 0
 
+
+def get_expected_log_pattern():
+    # r forces Python to NOT interpret any character which would otherwise
+    #   make sense for it, such as "escaping character" \.
+
+    # IMPORTANT: (?P<group_name>actual_regex_pattern) allows quick retrieval
+    #   of a subset of the matched line.
+    IP = r"(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
+    DATE = r"(?P<date>\d{4}-\d{2}-\d{2})"
+    # Need to escape . which otherwise means "whatever character" in regex.
+    TIME = r"(?P<time>\d{2}:\d{2}:\d{2}\.\d+)"
+    URL = r'(?P<url>\"GET /projects/260 HTTP/1.1\")'
+    # Confer https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
+    HTTP_CODE = r"(?P<http_code>[1-5][0-9][0-9])"
+    FILE_SIZE = r"(?P<file_size>\d+)"
+    # Need to escape [] which otherwise define "character set" in regex.
+    full_pattern = f"{IP} - \[{DATE} {TIME}\] {URL} {HTTP_CODE} {FILE_SIZE}"
+    return full_pattern
+
+
+# TEST
+print("========== START DEV DEBUG PHASE ============")
+
+test_line = '124.132.23.8 - [2026-06-04 14:56:51.894413] "GET /projects/260 HTTP/1.1" 405 234'
+print(test_line)
+log_expected_pattern__basic = "^\d{3}\."
+parse_result = re.search(log_expected_pattern__basic, test_line)
+print("=== Regex object attributes ===", dir(parse_result), "=== end attributes ===", sep='\n')
+print("String attribute:" , parse_result.string)
+print("Groups:", parse_result.groups)
+print("Groups:", parse_result.group(0))
+print("===== NEXT =====")
+log_expected_pattern__assembled = get_expected_log_pattern();
+print(log_expected_pattern__assembled)
+parse_result_2 = re.search(log_expected_pattern__assembled, test_line)
+print(parse_result_2.string)
+print("Group 0:", parse_result_2.group(0))
+print("Group 1:", parse_result_2.group(1))
+print("Group 2:", parse_result_2.group(2))
+print("Group HTTP CODE", parse_result_2.group("http_code"))
+
+
+
+print("========== END DEV DEBUG PHASE ============")
+
+
+if __name__ == "__main__":
+    # Counter to keep track of log lines analyzed.
+    lines_read = 0
+    try:
+        # while sys.stdin.readline() != "" BAD IDEA: line read during evaluation.
+        # for line in sys.stdin.readline(): -> Readline ALREADY returns a line!!
+        for line in sys.stdin:
+            # print("This is the line read:\n", line)
+            pass
+    except KeyboardInterrupt:
+        pass
+    finally:
+        print("End of script")
 #
 # === Chosen architecture for v1 ===
 #
 # Global dictionary which will store the counters for each supported HTTP code
-# supported_http_codes_counts = {200: 0, 201, 0 etc}
-# Global variable for file_size
+# 
+# Global variable for file_sizesupported_http_codes_counts = {200: 0, 201, 0 etc}
 # file_size = 0
 # Global variable for line read validation (regex)
 # -> Made global for readability and ease of maintenance, but could be argued.
