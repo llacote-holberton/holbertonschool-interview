@@ -35,23 +35,29 @@ def get_expected_log_pattern():
     HTTP_CODE = r"(?P<http_code>[1-5][0-9][0-9])"
     FILE_SIZE = r"(?P<file_size>\d+)"
     # Need to escape [] which otherwise define "character set" in regex.
-    full_pattern = f"{IP} - \[{DATE} {TIME}\] {URL} {HTTP_CODE} {FILE_SIZE}"
+    full_pattern = f"^{IP} - \[{DATE} {TIME}\] {URL} {HTTP_CODE} {FILE_SIZE}$"
     return full_pattern
+
+# Previously validate_line_format, analyse_line
+def get_log_info(line: string) -> False|(error_code, file_size):
+    regex_match = re.search(log_expected_pattern, line)
+    if regex_match is None:
+        return False
+    http_code = int(regex_match.group("http_code"))
+    file_size = int(regex_match.group("file_size"))
+    # print(f"@dev: Found: {http_code}, {file_size}")
+    # print(supported_http_codes)
+    if http_code in supported_http_codes:
+        return (http_code, file_size)
+    else:
+        return False
 
 
 # TEST
 print("========== START DEV DEBUG PHASE ============")
 
 test_line = '124.132.23.8 - [2026-06-04 14:56:51.894413] "GET /projects/260 HTTP/1.1" 405 234'
-print(test_line)
-log_expected_pattern__basic = "^\d{3}\."
-parse_result = re.search(log_expected_pattern__basic, test_line)
-print("=== Regex object attributes ===", dir(parse_result), "=== end attributes ===", sep='\n')
-print("String attribute:" , parse_result.string)
-print("Groups:", parse_result.groups)
-print("Groups:", parse_result.group(0))
-print("===== NEXT =====")
-log_expected_pattern__assembled = get_expected_log_pattern();
+log_expected_pattern__assembled = get_expected_log_pattern()
 print(log_expected_pattern__assembled)
 parse_result_2 = re.search(log_expected_pattern__assembled, test_line)
 print(parse_result_2.string)
@@ -60,7 +66,10 @@ print("Group 1:", parse_result_2.group(1))
 print("Group 2:", parse_result_2.group(2))
 print("Group HTTP CODE", parse_result_2.group("http_code"))
 
+test_line_invalid = "TOTO"
+log_expected_pattern = get_expected_log_pattern()
 
+get_log_info(test_line_invalid)
 
 print("========== END DEV DEBUG PHASE ============")
 
@@ -68,12 +77,15 @@ print("========== END DEV DEBUG PHASE ============")
 if __name__ == "__main__":
     # Counter to keep track of log lines analyzed.
     lines_read = 0
+    log_expected_pattern = get_expected_log_pattern()
+
     try:
         # while sys.stdin.readline() != "" BAD IDEA: line read during evaluation.
         # for line in sys.stdin.readline(): -> Readline ALREADY returns a line!!
         for line in sys.stdin:
             # print("This is the line read:\n", line)
-            pass
+            log_line_info = get_log_info(line)
+            print(log_line_info)
     except KeyboardInterrupt:
         pass
     finally:
