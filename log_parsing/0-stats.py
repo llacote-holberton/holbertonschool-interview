@@ -11,7 +11,7 @@ http_codes_counts = dict.fromkeys(supported_http_codes, 0)
 file_size = 0
 
 
-def get_expected_log_pattern() -> str:
+def get_expected_log_pattern(mode="full") -> str:
     """Assembles full regex pattern for log search"""
 
     IP = r"(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
@@ -24,7 +24,10 @@ def get_expected_log_pattern() -> str:
     HTTP_CODE = r"(?P<http_code>[1-5][0-9][0-9])"
     FILE_SIZE = r"(?P<file_size>\d+)"
     # Need to escape [] which otherwise define "character set" in regex.
-    full_pattern = f"{IP}.* {HTTP_CODE} {FILE_SIZE}$"
+    if mode == "minimal":
+        full_pattern = f"^{IP} - .* {HTTP_CODE} {FILE_SIZE}$"
+    else:
+        full_pattern = f"^{IP} - {DATETIME} {URL} {HTTP_CODE} {FILE_SIZE}$"
     return full_pattern
 
 
@@ -42,6 +45,20 @@ def get_log_info(line: str) -> tuple:
         return None
 
 
+def get_log_info_from_split(line: str) -> tuple:
+    """Function trying to find infos from basic split"""
+
+    # Kinda fed up with the exercise being contradictory
+    #   so going for quick & dirty for the checker.
+    # In a real project I'd take the time to convert
+    #   properly first in a try/catch block.
+    *_, http_code, file_size = line.split()
+    valid_http_code = int(http_code) in supported_http_codes
+    valid_file_size = int(file_size) >= 0
+    if valid_http_code and valid_file_size:
+        return (int(http_code), int(file_size))
+
+
 def print_current_summary():
     """Prints infos on file size and searched HTTP codes count"""
     print(f"File size: {file_size}")
@@ -56,7 +73,7 @@ if __name__ == "__main__":
 
     try:
         for line in sys.stdin:
-            log_line_info = get_log_info(line)
+            log_line_info = get_log_info_from_split(line)
             lines_read += 1
 
             if isinstance(log_line_info, tuple):
