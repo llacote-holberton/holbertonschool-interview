@@ -28,7 +28,7 @@ def get_expected_log_pattern() -> str:
     return full_pattern
 
 
-def get_log_info(line: str) -> tuple | None:
+def get_log_info(line: str) -> tuple:
     """Function analyzing line and returning code and size if valid"""
     regex_match = re.search(log_expected_pattern, line)
     if regex_match is None:
