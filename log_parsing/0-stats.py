@@ -4,28 +4,16 @@
 import sys  # Required to read standard input either interactive or not.
 import re   # Required to parse strings with Regular Expressions
 
-# GOAL: provide perpettually updated summary of log file size and
-#   aggregate count of identified HTTP error codes.
-# NOTES:
-# - New output should be displayed every 10 lines or when process ends.
-# - Lines not respecting expected format will be "skipped" (but counted).
 
-# GLOBAL VARIABLES
-# 1. Set defining the only HTTP codes we are interested in.
-#    Using set on purpose to stress unicity and facilitate validation.
+# GLOBAL VARIABLES: "searched codes" and counts dictionary, file_size.
 supported_http_codes = {200, 301, 400, 401, 403, 404, 405, 500}
-# 2. Initializing the counters
 http_codes_counts = dict.fromkeys(supported_http_codes, 0)
-# 3. Initializing the file size
 file_size = 0
 
 
-def get_expected_log_pattern():
-    # r forces Python to NOT interpret any character which would otherwise
-    #   make sense for it, such as "escaping character" \.
+def get_expected_log_pattern() -> str:
+    """Assembles full regex pattern for log search"""
 
-    # IMPORTANT: (?P<group_name>actual_regex_pattern) allows quick retrieval
-    #   of a subset of the matched line.
     IP = r"(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
     DATE = r"(?P<date>\d{4}-\d{2}-\d{2})"
     # Need to escape . which otherwise means "whatever character" in regex.
@@ -39,15 +27,15 @@ def get_expected_log_pattern():
     full_pattern = f"^{IP} - {DATETIME} {URL} {HTTP_CODE} {FILE_SIZE}$"
     return full_pattern
 
-# Previously validate_line_format, analyse_line
-def get_log_info(line: string) -> False|(error_code, file_size):
+
+def get_log_info(line: str) -> False | tuple:
+    """Function analyzing line and returning code and size if valid"""
     regex_match = re.search(log_expected_pattern, line)
     if regex_match is None:
         return False
     http_code = int(regex_match.group("http_code"))
     file_size = int(regex_match.group("file_size"))
-    # print(f"@dev: Found: {http_code}, {file_size}")
-    # print(supported_http_codes)
+
     if http_code in supported_http_codes:
         return (http_code, file_size)
     else:
@@ -55,6 +43,7 @@ def get_log_info(line: string) -> False|(error_code, file_size):
 
 
 def print_current_summary():
+    """Prints infos on file size and searched HTTP codes count"""
     print(f"File size: {file_size}")
     for code, count in sorted(http_codes_counts.items()):
         if count > 0:
@@ -62,18 +51,14 @@ def print_current_summary():
 
 
 if __name__ == "__main__":
-    # Counter to keep track of log lines analyzed.
-    lines_read = 0
+    lines_read = 0  # Used to trigger prints periodically.
     log_expected_pattern = get_expected_log_pattern()
 
     try:
-        # while sys.stdin.readline() != "" BAD IDEA: line read during evaluation.
-        # for line in sys.stdin.readline(): -> Readline ALREADY returns a line!!
         for line in sys.stdin:
-            # print("This is the line read:\n", line)
             log_line_info = get_log_info(line)
             lines_read += 1
-            # print(log_line_info)
+
             if isinstance(log_line_info, tuple):
                 code = log_line_info[0]
                 size = log_line_info[1]
@@ -85,13 +70,13 @@ if __name__ == "__main__":
         pass
     finally:
         print_current_summary()
-        # print("End of script")
+
 #
 # === Chosen architecture for v1 ===
 #
 # Global dictionary which will store the counters for each supported HTTP code
-# 
-# Global variable for file_sizesupported_http_codes_counts = {200: 0, 201, 0 etc}
+#
+# Global variables supported_http_codes_counts = {200: 0, 201, 0 etc}
 # file_size = 0
 # Global variable for line read validation (regex)
 # -> Made global for readability and ease of maintenance, but could be argued.
@@ -108,6 +93,40 @@ if __name__ == "__main__":
 # Orchestrator function (also charged for a final print
 #   when script ends for whatever reason)
 # main()
+
+# ========== DEVELOPER DOCUMENTATION ===========
+#
+# ===== BUSINESS GOAL =====
+# Provide "perpetually self-updating summary" of logs's
+#   file size and aggregate count for a chosen list
+#   of identified HTTP error codes.
+# NOTES:
+# - New output should be displayed every 10 lines or when process ends.
+# - Lines not respecting expected format will be "skipped" (but counted).
+
+# ========== NOTES & DESIGN CHOICES ===========
+# == Regex pattern assembly ==
+# On 'r' prefixer for pattern components:
+#   r forces Python to NOT interpret any character which would otherwise
+#   make sense for it, such as "escaping character" \.
+# On pattern encapsulation with (?P<string>):
+#   (?P<group_name>actual_regex_pattern) allows quick retrieval
+#   of a subset of the matched line.
+#
+# == "Searched HTTP codes" definition and count initialization ==
+# 1. Using set on purpose to stress unicity and facilitate validation.
+# 2. Initializing the counters to make orchestration process easier on
+#      the count incrementation part.
+#
+# == Function to parse lines and check if valid log ==
+# Was hard to find a name explicit enough.
+# Previously validate_line_format, analyse_line
+#
+#
+# == On using "for line in" instead of while
+# while sys.stdin.readline() != "" BAD IDEA: line read during evaluation.
+# for line in sys.stdin.readline(): -> Readline ALREADY returns a line!!
+
 
 # ========== BRAINSTORMING ============
 # === Architecture exploration ===
