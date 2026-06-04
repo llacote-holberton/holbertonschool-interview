@@ -17,7 +17,7 @@ def get_expected_log_pattern() -> str:
     IP = r"(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
     DATE = r"(?P<date>\d{4}-\d{2}-\d{2})"
     # Need to escape . which otherwise means "whatever character" in regex.
-    TIME = r"(?P<time>\d{2}:\d{2}:\d{2}\.\d+)"
+    TIME = r"(?P<time>\d{2}:\d{2}:\d{2}(\.\d+)?)"
     DATETIME = r"(?P<datetime>\[" + DATE + r" " + TIME + r"\])"
     URL = r'(?P<url>\"GET /projects/260 HTTP/1.1\")'
     # Confer https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
