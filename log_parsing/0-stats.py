@@ -30,7 +30,7 @@ def get_expected_log_pattern() -> str:
 
 def get_log_info(line: str) -> tuple:
     """Function analyzing line and returning code and size if valid"""
-    regex_match = re.search(log_expected_pattern, line)
+    regex_match = re.search(log_expected_pattern, line.strip())
     if regex_match is None:
         return None
     http_code = int(regex_match.group("http_code"))
