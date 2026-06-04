@@ -30,12 +30,13 @@ def get_expected_log_pattern():
     DATE = r"(?P<date>\d{4}-\d{2}-\d{2})"
     # Need to escape . which otherwise means "whatever character" in regex.
     TIME = r"(?P<time>\d{2}:\d{2}:\d{2}\.\d+)"
+    DATETIME = r"(?P<datetime>\[" + DATE + r" " + TIME + r"\])"
     URL = r'(?P<url>\"GET /projects/260 HTTP/1.1\")'
     # Confer https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
     HTTP_CODE = r"(?P<http_code>[1-5][0-9][0-9])"
     FILE_SIZE = r"(?P<file_size>\d+)"
     # Need to escape [] which otherwise define "character set" in regex.
-    full_pattern = f"^{IP} - \[{DATE} {TIME}\] {URL} {HTTP_CODE} {FILE_SIZE}$"
+    full_pattern = f"^{IP} - {DATETIME} {URL} {HTTP_CODE} {FILE_SIZE}$"
     return full_pattern
 
 # Previously validate_line_format, analyse_line
@@ -56,7 +57,8 @@ def get_log_info(line: string) -> False|(error_code, file_size):
 def print_current_summary():
     print(f"File size: {file_size}")
     for code, count in sorted(http_codes_counts.items()):
-        print(f"{code}: {count}")
+        if count > 0:
+            print(f"{code}: {count}")
 
 
 if __name__ == "__main__":
