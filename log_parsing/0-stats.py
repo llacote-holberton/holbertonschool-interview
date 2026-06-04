@@ -28,18 +28,18 @@ def get_expected_log_pattern() -> str:
     return full_pattern
 
 
-def get_log_info(line: str) -> False | tuple:
+def get_log_info(line: str) -> tuple | None:
     """Function analyzing line and returning code and size if valid"""
     regex_match = re.search(log_expected_pattern, line)
     if regex_match is None:
-        return False
+        return None
     http_code = int(regex_match.group("http_code"))
     file_size = int(regex_match.group("file_size"))
 
     if http_code in supported_http_codes:
         return (http_code, file_size)
     else:
-        return False
+        return None
 
 
 def print_current_summary():
