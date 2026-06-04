@@ -24,7 +24,7 @@ def get_expected_log_pattern() -> str:
     HTTP_CODE = r"(?P<http_code>[1-5][0-9][0-9])"
     FILE_SIZE = r"(?P<file_size>\d+)"
     # Need to escape [] which otherwise define "character set" in regex.
-    full_pattern = f"{IP} - .*\" {HTTP_CODE} {FILE_SIZE}$"
+    full_pattern = f"{IP}.* {HTTP_CODE} {FILE_SIZE}$"
     return full_pattern
 
 
