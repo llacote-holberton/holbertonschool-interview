@@ -61,15 +61,22 @@ def get_log_info_from_split(line: str) -> tuple:
     except (IndexError, ValueError) as e:
         return None
 
-def print_current_summary():
-    """Prints infos on file size and searched HTTP codes count"""
-    print(f"File size: {file_size}")
-    for code, count in sorted(http_codes_counts.items()):
-        if count > 0:
-            print(f"{code}: {count}")
+
+def extract_info_with_split(line: str):
+    """Function extracting log info"""
+
+    try:
+        *_, code, size = line.split()
+        if int(code) in supported_http_codes:
+            http_codes_counts[int(code)] += 1
+        if int(size) >= 0:
+            global file_size
+            file_size += int(size)
+    except (IndexError, ValueError) as e:
+        pass
 
 
-if __name__ == "__main__":
+def properly_validate_logline():
     lines_read = 0  # Used to trigger prints periodically.
     log_expected_pattern = get_expected_log_pattern()
 
@@ -83,6 +90,29 @@ if __name__ == "__main__":
                 size = log_line_info[1]
                 http_codes_counts[code] += 1
                 file_size += size
+            if lines_read % 10 == 0:
+                print_current_summary()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        print_current_summary()
+
+
+def print_current_summary():
+    """Prints infos on file size and searched HTTP codes count"""
+    print(f"File size: {file_size}")
+    for code, count in sorted(http_codes_counts.items()):
+        if count > 0:
+            print(f"{code}: {count}")
+
+
+if __name__ == "__main__":
+    lines_read = 0
+
+    try:
+        for line in sys.stdin:
+            extract_info_with_split(line)
+            lines_read += 1
             if lines_read % 10 == 0:
                 print_current_summary()
     except KeyboardInterrupt:
