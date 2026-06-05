@@ -52,12 +52,16 @@ def get_log_info_from_split(line: str) -> tuple:
     #   so going for quick & dirty for the checker.
     # In a real project I'd take the time to convert
     #   properly first in a try/catch block.
-    *_, http_code, file_size = line.split()
-    valid_http_code = int(http_code) in supported_http_codes
-    valid_file_size = int(file_size) >= 0
-    if valid_http_code and valid_file_size:
-        return (int(http_code), int(file_size))
-
+    try:
+        *_, http_code, file_size = line.split()
+        valid_http_code = int(http_code) in supported_http_codes
+        valid_file_size = int(file_size) >= 0
+        if valid_http_code and valid_file_size:
+            return (int(http_code), int(file_size))
+    except (IndexError, ValueError) as e:
+        print("Error occured on this line:\n====", line, "====", sep="\n")
+        print(e)
+        
 
 def print_current_summary():
     """Prints infos on file size and searched HTTP codes count"""
