@@ -59,9 +59,7 @@ def get_log_info_from_split(line: str) -> tuple:
         if valid_http_code and valid_file_size:
             return (int(http_code), int(file_size))
     except (IndexError, ValueError) as e:
-        print("Error occured on this line:\n====", line, "====", sep="\n")
-        print(e)
-        
+        return None
 
 def print_current_summary():
     """Prints infos on file size and searched HTTP codes count"""
