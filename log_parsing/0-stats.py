@@ -64,16 +64,20 @@ def get_log_info_from_split(line: str) -> tuple:
 
 def extract_info_with_split(line: str):
     """Function extracting log info"""
-
+    global file_size
+    parts = line.split()
+    if len(parts) < 2:
+        return
     try:
-        *_, code, size = line.split()
-        if int(code) in supported_http_codes:
-            http_codes_counts[int(code)] += 1
-        if int(size) >= 0:
-            global file_size
-            file_size += int(size)
-    except (IndexError, ValueError) as e:
-        pass
+        file_size += int(parts[-1])
+    except ValueError:
+        return  # taille invalide -> on skippe tout
+    try:
+        code = int(parts[-2])
+        if code in supported_http_codes:
+            http_codes_counts[code] += 1
+    except ValueError:
+        pass  # code invalide -> on skippe juste le code, taille déjà comptée
 
 
 def properly_validate_logline():
