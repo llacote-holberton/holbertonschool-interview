@@ -27,8 +27,9 @@ def is_continuation_byte(byte) -> bool:
 
 def validUTF8(data: list) -> bool:
     """Validates that list of int can be interpreted as valid UTF8 string"""
-    if len(data) == 0:
-        return False
+    # Apparently empty list should be considered valid...
+    # if len(data) == 0:
+    #     return False
 
     data_is_valid_UTF8_sequence = None
     # Renamed from multibyte_counter which was less explicit
