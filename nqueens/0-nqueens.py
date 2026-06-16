@@ -19,10 +19,6 @@ if N < 4:
     print("N must be at least 4")
     exit(1)
 
-
-# Let's first find one solution for N = 4.
-N = 4
-
 # From the brainstorming we can infer several variables to hold "state".
 occupied_lines = set()  # actually superfluous, kept for now for simplicity.
 # At first I thought about using a Set in which columns numbers would be added
