@@ -77,7 +77,7 @@ def update_state_registries(row_index, col_index, mode):
 
     if mode == "unlock":
         occupied_columns[col_index] = False
-        occupied_downward_diagonals.remove(downwards_diag_code)
+        occupied_downward_diagonals.discard(downwards_diag_code)
         occupied_upwards_diagonals[upwards_diag_code] = False
 
     elif mode == "lock":
@@ -98,40 +98,82 @@ def unlock_queen_position(row_index, col_index):
     queens_positions[row_index] = -1
     update_state_registries(row_index, col_index, "unlock")
 
+
+solutions = []
+# New approach: while lets us manipulate the "loop control" freely.
+# Contrarily to for which has its inner counter, untouchable.
+current_queen = 0  # Hereafter 'cr'
+while current_queen <= N:
+    if current_queen == N:
+        # We found a valid solution
+        # So we should save the current queens_positions
+        #   in a "solutions_list" or something
+        solutions.append([[r, c] for r, c in enumerate(queens_positions)])
+        # THEN restart exploration with row 0 and col...
+        #   "next free col?"
+        current_queen -= 1
+        unlock_queen_position(current_queen, queens_positions[current_queen])
+        continue  # Required to immediately "restart cycle" with updated info
+
+    # Computing starting position for search.
+    # Row is easy, it's directly the value of current_queen.
+    # For Col it's kinda smart but not very intuitive...
+    # Because we "initialize" value at -1, if that is the case,
+    #   then we didn't explore that row yet. So we can start at col pos 0.
+    #   so "stored value + 1" == -1 + 1 == 0 so it works.
+    # If it was >=0 it means we have already attempted this row at least once
+    #   and stored a col position which seemed fair at the time...
+    # But restart because a previous loop cycle for next line was a dead-end
+    #   and triggered a backtrack. So we know "memorized position" is bad
+    #   so we want to re-start search for next one. So "stored value + 1"
+    #   also works.
+    cr_row_idx = current_queen
+    col_search_start = queens_positions[current_queen] + 1
+
+    # And since now I have functions which always use row and col,
+    # I can generate a new "search grid" every loop with updated start
+    #   instead on trying to rely on occupied_columns.
+    try:
+        cr_col_idx = next(
+            idx for idx in range(col_search_start, N)
+            if is_safe_position(cr_row_idx, idx)
+        )
+        lock_queen_position(cr_row_idx, cr_col_idx)
+    except StopIteration as e:
+        print("Current queen is", current_queen)
+        prev_queen_row = current_queen -1
+        prev_queen_col = queens_positions[prev_queen_row]
+        unlock_queen_position(prev_queen_row, prev_queen_col)
+        current_queen -= 1
+
 # We start a loop in which we try to find a valid position
 #   for each subsequent queen on her exclusive line.
-for queen_number in range(N):
-    # First find the first available row.
-    # free_row = next(r for r, pos in enumerate(queens_positions) if pos == -1)
-    # queens_positions[free_row] = 666 + queen_number
-    # Never mind I'm stupid, by design it is the value of queen_number
-
-    # free_col = next(i for i, occ in enumerate(occupied_columns) if occ == False)
-    # Must include the checks for downwards_diag_code and upwards 
-    # AND if either invalidates pos try the next col.
-    try:
-        free_col_index = next(i for i, occ in enumerate(occupied_columns) 
-            if is_safe_position(queen_number, i))
-        # If exception didn't raise it means we found a safe column pos for
-        #    current row number, so we can place our queen and update "states".
-        lock_queen_position(queen_number, free_col_index)
-    except StopIteration as e:
-        # We didn't find how to pursue in this situation, meaning that we must
-        #   try "moving further" the previous queen to see if that unlocks...
-        print("No solution found, need backtrack!")
-        prev_queen_row = queen_number -1
-        prev_queen_col = queens_positions[prev_queen_row]
-        # Need to reset states which were affected previously
-        # Remove truthness for "state" tables, then reset "main table"
-        unlock_queen_position(prev_queen_row, prev_queen_col)
-        # FINALLY "push back" the main counter to force loop to restart
-        #   "from the previous queen"
-        queen_number -= 1
-
-    # Problem: how to backtrack if I end up blocked???
-
-
-print(queens_positions)
+# for queen_number in range(N):
+# 
+# 
+#     try:
+#         free_col_index = next(i for i, occ in enumerate(occupied_columns) 
+#             if is_safe_position(queen_number, i))
+#         # If exception didn't raise it means we found a safe column pos for
+#         #    current row number, so we can place our queen and update "states".
+#         lock_queen_position(queen_number, free_col_index)
+#     except StopIteration as e:
+#         # We didn't find how to pursue in this situation, meaning that we must
+#         #   try "moving further" the previous queen to see if that unlocks...
+#         print("No solution found, need backtrack!")
+#         prev_queen_row = queen_number -1
+#         prev_queen_col = queens_positions[prev_queen_row]
+#         # Need to reset states which were affected previously
+#         # Remove truthness for "state" tables, then reset "main table"
+#         unlock_queen_position(prev_queen_row, prev_queen_col)
+#         # FINALLY "push back" the main counter to force loop to restart
+#         #   "from the previous queen"
+#         queen_number -= 1
+# 
+#     # Problem: how to backtrack if I end up blocked???
+# 
+# 
+# print(queens_positions)
 
 # ===== Task instructions ====
 # The N queens puzzle is the challenge of placing N non-attacking queens
