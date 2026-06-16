@@ -70,6 +70,34 @@ def is_safe_position(row_index, col_index):
     return True
 
 
+def update_state_registries(row_index, col_index, mode):
+
+    downwards_diag_code = row_index - col_index
+    upwards_diag_code = row_index + col_index
+
+    if mode == "unlock":
+        occupied_columns[col_index] = False
+        occupied_downward_diagonals.remove(downwards_diag_code)
+        occupied_upwards_diagonals[upwards_diag_code] = False
+
+    elif mode == "lock":
+        occupied_columns[col_index] = True
+        occupied_downward_diagonals.add(downwards_diag_code)
+        occupied_upwards_diagonals[upwards_diag_code] = True
+
+    else:
+        raise ValueError("Only supported modes are 'lock' and 'unlock'")
+
+
+def lock_queen_position(row_index, col_index):
+    queens_positions[row_index] = col_index
+    update_state_registries(row_index, col_index, "lock")
+
+
+def unlock_queen_position(row_index, col_index):
+    queens_positions[row_index] = -1
+    update_state_registries(row_index, col_index, "unlock")
+
 # We start a loop in which we try to find a valid position
 #   for each subsequent queen on her exclusive line.
 for queen_number in range(N):
@@ -86,10 +114,7 @@ for queen_number in range(N):
             if is_safe_position(queen_number, i))
         # If exception didn't raise it means we found a safe column pos for
         #    current row number, so we can place our queen and update "states".
-        queens_positions[queen_number] = free_col_index
-        occupied_columns[free_col_index] = True
-        occupied_downward_diagonals.add((queen_number - free_col_index))
-        occupied_upwards_diagonals[(queen_number + free_col_index)] = True
+        lock_queen_position(queen_number, free_col_index)
     except StopIteration as e:
         # We didn't find how to pursue in this situation, meaning that we must
         #   try "moving further" the previous queen to see if that unlocks...
@@ -98,10 +123,7 @@ for queen_number in range(N):
         prev_queen_col = queens_positions[prev_queen_row]
         # Need to reset states which were affected previously
         # Remove truthness for "state" tables, then reset "main table"
-        occupied_columns[prev_queen_col] = False
-        occupied_downward_diagonals.remove(prev_queen_row - prev_queen_col)
-        occupied_upwards_diagonals[prev_queen_row + prev_queen_col] = False
-        queens_positions[prev_queen_row] = -1
+        unlock_queen_position(prev_queen_row, prev_queen_col)
         # FINALLY "push back" the main counter to force loop to restart
         #   "from the previous queen"
         queen_number -= 1
