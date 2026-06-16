@@ -53,9 +53,16 @@ def find_valid_pos(N):
 
 
 def is_safe_position(row_index, col_index):
+    # Was the culprit! Because I changed for a while
+    #   and in this while when backtracking we need
+    #   to temporarily keep the previously stored col index
+    #   so I had removed the "reset value to -1"...
+    # This check was always returning false.
+    # Plus with the new while loop design we are guaranteed
+    #   to only have one queen per row anyways. So it is now useless.
     # Check row unused yet
-    if queens_positions[row_index] != -1:
-        return False
+    # if queens_positions[row_index] != -1:
+    #     return False
     # Check col not locked
     if occupied_columns[col_index]:
         return False
@@ -112,7 +119,16 @@ while current_queen >= 0:  # <= N only gets one valid solution at best
         # THEN restart exploration with row 0 and col...
         #   "next free col?"
         current_queen -= 1
-        unlock_queen_position(current_queen, queens_positions[current_queen])
+
+        # unlock_queen_position(current_queen, queens_positions[current_queen])
+        # WRONG: fully unlocking meant resetting the queen's position to -1
+        #  thus making the code start always from same position.
+        # We just want to backtrack, so just free the state registries
+        update_state_registries(
+            current_queen,
+            queens_positions[current_queen],
+            "unlock"
+        )
         continue  # Required to immediately "restart cycle" with updated info
 
     # Computing starting position for search.
@@ -162,7 +178,8 @@ while current_queen >= 0:  # <= N only gets one valid solution at best
                 "unlock"
             )
 
-print(solutions)
+for solution in solutions:
+    print(solution)
 
 # We start a loop in which we try to find a valid position
 #   for each subsequent queen on her exclusive line.
