@@ -103,7 +103,7 @@ solutions = []
 # New approach: while lets us manipulate the "loop control" freely.
 # Contrarily to for which has its inner counter, untouchable.
 current_queen = 0  # Hereafter 'cr'
-while current_queen <= N:
+while current_queen >= 0:  # <= N only gets one valid solution at best
     if current_queen == N:
         # We found a valid solution
         # So we should save the current queens_positions
@@ -133,18 +133,36 @@ while current_queen <= N:
     # And since now I have functions which always use row and col,
     # I can generate a new "search grid" every loop with updated start
     #   instead on trying to rely on occupied_columns.
-    try:
-        cr_col_idx = next(
-            idx for idx in range(col_search_start, N)
-            if is_safe_position(cr_row_idx, idx)
-        )
+    cr_col_idx = next(
+        (idx for idx in range(col_search_start, N)
+        if is_safe_position(cr_row_idx, idx)),
+        None  # Next actually can have a "fallback option"
+        # But it means the whole expression before "is the first parameter"
+    )
+    if cr_col_idx is not None:
         lock_queen_position(cr_row_idx, cr_col_idx)
-    except StopIteration as e:
-        print("Current queen is", current_queen)
-        prev_queen_row = current_queen -1
-        prev_queen_col = queens_positions[prev_queen_row]
-        unlock_queen_position(prev_queen_row, prev_queen_col)
+        current_queen +=1  # Drawback of this approach: manually push counter
+    else:
+        # prev_queen_row = current_queen -1
+        # prev_queen_col = queens_positions[prev_queen_row]
+        # if current_queen >= 0:
+        # WRONG: because I delete the stored position so it will "derail"
+        #     the logic of "I backtracked because dead end so I want to"
+        #     "restart from the right of where I was"
+        #     unlock_queen_position(prev_queen_row, prev_queen_col)
+        # current_queen -= 1
+        queens_positions[current_queen] = -1  # Security, should not harm
         current_queen -= 1
+        # Unlock the registries ONLY, keep the stored memory,
+        #   otherwise will make infinite loop.
+        if current_queen >= 0:
+            update_state_registries(
+                current_queen, 
+                queens_positions[current_queen],
+                "unlock"
+            )
+
+print(solutions)
 
 # We start a loop in which we try to find a valid position
 #   for each subsequent queen on her exclusive line.
