@@ -32,17 +32,9 @@ def nqueens_solver():
     def init__setup_state_registries(N: int):
         """Defines and set default values for the 'truth tables' lists & set"""
 
-        # From the brainstorming we can infer several variables to hold "state"
         occupied_columns = [False for _ in range(N)]
-        # Using "list creation by repetition" syntax
         occupied_upwards_diagonals = [False] * (2 * N - 1)
-
-        # For those since the value can be negative we'll use a Set for now.
-        #   Later I'll try to find how to use a truth table like the rest.
         occupied_downward_diagonals = set()
-
-        # Index will represent line, Value the column for that queen.
-        # Initializing at -1 because 0 is a "valid key" in that context.
         queens_positions = [-1] * N
 
         return (
@@ -52,19 +44,21 @@ def nqueens_solver():
             queens_positions
         )
 
+# === Inner functions: Search process helpers ===
     def is_safe_position(row_index, col_index):
         """Checks desired grid position is not used/threatened in any way"""
-        # Check col not locked
+
         if occupied_columns[col_index]:
             return False
-        # Check not across occupied downwards diagonal
+
         downwards_diag_code = row_index - col_index
         if downwards_diag_code in occupied_downward_diagonals:
             return False
-        # Check not across occupied upwards diagonal
+
         upwards_diag_code = row_index + col_index
         if occupied_upwards_diagonals[upwards_diag_code]:
             return False
+
         return True
 
     def update_state_registries(row_index, col_index, mode):
@@ -98,7 +92,6 @@ def nqueens_solver():
     def backtrack():
         """Goes to previous queen and frees up its related positions"""
         nonlocal current_queen
-        # Special syntax which allows inner function to MODIFY a parent var.
         current_queen -= 1
         if current_queen >= 0:
             update_state_registries(
@@ -108,9 +101,7 @@ def nqueens_solver():
             )
 
     def explore():
-
-        # REQUIRED to allow finding and modifying. ALSO WHY
-        #   it is not given as argument nor defined locally.
+        """Exploring all paths of the grid saving every solution found"""
         nonlocal current_queen
         while current_queen >= 0:
             if current_queen == N:
@@ -140,7 +131,8 @@ def nqueens_solver():
                 queens_positions[current_queen] = -1
                 backtrack()
 
-    # Initializing everything we need to work
+    # "Main orchestration"
+    #    Initializing everything we need to work
     N = init__ensure_valid_argument()
     (   # Beware that variable names match the ones in function, in same order!
         occupied_columns,
@@ -150,73 +142,14 @@ def nqueens_solver():
     ) = init__setup_state_registries(N)
     solutions = []
 
-    # Starting exploration
+    #    Starting exploration
     current_queen = 0
     explore()
 
+    #    Outputting solutions found
     for solution in solutions:
         print(solution)
 
 
 if __name__ == "__main__":
     nqueens_solver()
-
-
-# ===== Task instructions ====
-# The N queens puzzle is the challenge of placing N non-attacking queens
-# on an N×N chessboard. Write a program that solves the N queens problem.
-# Usage: nqueens N
-# If the user called the program with the wrong number of arguments,
-#   print Usage: nqueens N, followed by a new line, and exit with the status 1
-# where N must be an integer greater or equal to 4
-# If N is not an integer, print N must be a number, followed by a new line,
-#   and exit with the status 1
-# If N is smaller than 4, print N must be at least 4, followed by a new line,
-#   and exit with the status 1
-# The program should print every possible solution to the problem
-# One solution per line
-# Format: see example
-# You don't have to print the solutions in a specific order
-# You are only allowed to import the sys module
-
-# ===== ARCHITECTURE DESIGN NOTES =====
-# === Why the formula for upwards diagonals ===
-# occupied_upwards_diagonals = [False] * (2 * N - 1)
-# Each diagonal has the same "cell value" (line + number)
-# Since we count from 0, last diagonal will be the last cell with value
-# (N-1 + N-1). Then we have to account for the "mini-diagonal" (0, 0).
-# -> (N-1) + (N-1) + 1 = 2N -2 + 1 = 2N - 1
-
-
-# ===== BRAINSTORMING =====
-# The usual way to resolve this problem is using backtracking process,
-#   in which we define as many "branches" as they are potential solutions
-#   with as many required subbranches, then start exploring at each step
-#   if the current value is breaking the rules (= stopping the "potential")
-#   or not.
-#   If not then we check if there is yet another element to check behind,
-#     if none then we have found a complete solution.
-#   If yes then we "lock" this branch as a dead-end, backtrack to the start
-#     of the next and restart process.
-# In this context the constraints are:
-#   1/ Each queen can "reach" ("attack") every position horizontally,
-#      vertically and in diagonal.
-#      Which implies that...
-#      Any row and column is "locked" as soon as one queen is somewhere inside.
-#         Consequently each queen has "its own line" & every line must have 1.
-#      The cells matching "45° diagonals" crossing every placed queen's cells
-#        are also condemned.
-#      => Realm of solutions is reduced with each computation step taken.
-# Picking an example.
-# With a 4 queens on 4-size grid...
-# Starting with placing Queen A at 0,0.
-# For the remaining queens, forbidden positions are...
-# Every cell of line 0
-# Every cell of column 0
-# Every cell which computation of "line number - column number" is the same
-#   as in A's cell (0 - 0 = 0), representing the "descending diagonal"
-#
-# Every cell which computation of "line number + column number" is the same
-#   as in A's cell (0+0).
-# So valid positions for Queen B on line 1 are only cells in columns 2 & 3.
-# (1, 0 is "locked column", 1,1 has "descending diagonal" 0 so locked diagonal)
