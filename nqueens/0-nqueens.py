@@ -7,6 +7,7 @@ import sys  # Required for input grab
 def nqueens_solver():
     """All-in-one N queens puzzle solver, requires an >=4 int as argument"""
 
+# === Inner functions: Initialization helpers ===
     def init__ensure_valid_argument():
         """Ensures program is called with proper arguments to resolve puzzle"""
 
@@ -100,6 +101,19 @@ def nqueens_solver():
         update_state_registries(row_index, col_index, "unlock")
 
 
+    def backtrack():
+        """"""
+        nonlocal current_queen
+        # Special syntax which allows inner function to MODIFY a parent var.
+        current_queen -= 1
+        if current_queen >= 0:
+            update_state_registries(
+                current_queen,
+                queens_positions[current_queen],
+                "unlock"
+            )
+
+
     # Initializing everything we need to work
     N = init__ensure_valid_argument()
     (   # Beware that variable names match the ones in function, in same order!
@@ -116,13 +130,7 @@ def nqueens_solver():
         if current_queen == N:
             # Means we found a valid solution, so save it and backtrack
             solutions.append([[r, c] for r, c in enumerate(queens_positions)])
-
-            current_queen -= 1
-            update_state_registries(
-                current_queen,
-                queens_positions[current_queen],
-                "unlock"
-            )
+            backtrack()
             continue
 
         # Computing starting positions for search.
@@ -143,13 +151,7 @@ def nqueens_solver():
         #   with previous queen in next free col pos.
         else:
             queens_positions[current_queen] = -1
-            current_queen -= 1
-            if current_queen >= 0:
-                update_state_registries(
-                    current_queen, 
-                    queens_positions[current_queen],
-                    "unlock"
-                )
+            backtrack()
 
     for solution in solutions:
         print(solution)
