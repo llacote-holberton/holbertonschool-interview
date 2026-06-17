@@ -96,7 +96,7 @@ def nqueens_solver():
         update_state_registries(row_index, col_index, "unlock")
 
     def backtrack():
-        """"""
+        """Goes to previous queen and frees up its related positions"""
         nonlocal current_queen
         # Special syntax which allows inner function to MODIFY a parent var.
         current_queen -= 1
@@ -106,6 +106,39 @@ def nqueens_solver():
                 queens_positions[current_queen],
                 "unlock"
             )
+
+    def explore():
+
+        # REQUIRED to allow finding and modifying. ALSO WHY
+        #   it is not given as argument nor defined locally.
+        nonlocal current_queen
+        while current_queen >= 0:
+            if current_queen == N:
+                # Means we found a valid solution, so save it and backtrack
+                solutions.append(
+                    [[r, c] for r, c in enumerate(queens_positions)]
+                )
+                backtrack()
+                continue
+
+            # Computing starting positions for search.
+            cr_row_idx = current_queen
+            col_search_start = queens_positions[current_queen] + 1
+
+            # Trying to find a valid col pos for current line insertion.
+            cr_col_idx = next(
+                (idx for idx in range(col_search_start, N)
+                    if is_safe_position(cr_row_idx, idx)), None
+            )
+            # Valid position found, we affect and go to next line.
+            if cr_col_idx is not None:
+                lock_queen_position(cr_row_idx, cr_col_idx)
+                current_queen += 1
+            # No valid position found meaning we need to backtrack and try
+            #   with previous queen in next free col pos.
+            else:
+                queens_positions[current_queen] = -1
+                backtrack()
 
     # Initializing everything we need to work
     N = init__ensure_valid_argument()
@@ -119,37 +152,14 @@ def nqueens_solver():
 
     # Starting exploration
     current_queen = 0
-    while current_queen >= 0:
-        if current_queen == N:
-            # Means we found a valid solution, so save it and backtrack
-            solutions.append([[r, c] for r, c in enumerate(queens_positions)])
-            backtrack()
-            continue
-
-        # Computing starting positions for search.
-        cr_row_idx = current_queen
-        col_search_start = queens_positions[current_queen] + 1
-
-        # Trying to find a valid col pos for current line insertion.
-        cr_col_idx = next(
-            (idx for idx in range(col_search_start, N)
-                if is_safe_position(cr_row_idx, idx)), None
-        )
-        # Valid position found, we affect and go to next line.
-        if cr_col_idx is not None:
-            lock_queen_position(cr_row_idx, cr_col_idx)
-            current_queen += 1
-        # No valid position found meaning we need to backtrack and try
-        #   with previous queen in next free col pos.
-        else:
-            queens_positions[current_queen] = -1
-            backtrack()
+    explore()
 
     for solution in solutions:
         print(solution)
 
 
-nqueens_solver()
+if __name__ == "__main__":
+    nqueens_solver()
 
 
 # ===== Task instructions ====
