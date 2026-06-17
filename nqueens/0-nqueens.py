@@ -3,22 +3,57 @@
 
 import sys  # Required for input grab
 
-if len(sys.argv) != 2:
-    print("Please give a number for chess size matching number of queens!")
-    print(sys.argv)
-    exit(1)
 
-try:
-    N = int(sys.argv[1])
-# TypeError cannot happen because sys module guarantees input to be string.
-except ValueError as e:
-    print("N must be a number")
-    exit(1)
+def resolver__check_arguments():
+    """Ensures program is called with proper arguments to resolve puzzle"""
 
-if N < 4:
-    print("N must be at least 4")
-    exit(1)
+    if len(sys.argv) != 2:
+        print("Please give a number for chess size matching number of queens!")
+        print(sys.argv)
+        exit(1)
 
+    try:
+        N = int(sys.argv[1])
+    # TypeError cannot happen because sys module guarantees input to be string.
+    except ValueError as e:
+        print("N must be a number")
+        exit(1)
+
+    if N < 4:
+        print("N must be at least 4")
+        exit(1)
+
+    return N
+
+
+def resolver__initialize_state_registries(N: int):
+    
+    # From the brainstorming we can infer several variables to hold "state".
+    occupied_columns = [False for _ in range(N)]
+    # Using "list creation by repetition" syntax
+    occupied_upwards_diagonals = [False] * (2 * N - 1)
+
+    # For those since the value can be negative we'll use a Set for now.
+    #   Later I'll try to find how to use a truth table like the rest.
+    occupied_downward_diagonals = set()
+
+    # Index will represent line, Value the column for that queen.
+    # Initializing at -1 because 0 is a "valid key" in that context.
+    queens_positions = [-1] * N
+
+    return (
+        occupied_columns,
+        occupied_upwards_diagonals,
+        occupied_downward_diagonals,
+        queens_positions
+    )
+
+
+
+# =======================
+
+
+N = resolver__check_arguments()
 # From the brainstorming we can infer several variables to hold "state".
 occupied_columns = [False for _ in range(N)]
 # Using "list creation by repetition" syntax
@@ -126,6 +161,168 @@ while current_queen >= 0:
 
 for solution in solutions:
     print(solution)
+
+
+def nqueens_solver():
+
+    def resolver__check_arguments():
+        """Ensures program is called with proper arguments to resolve puzzle"""
+
+        if len(sys.argv) != 2:
+            print("Please give a number for chess size matching number of queens!")
+            print(sys.argv)
+            exit(1)
+
+        try:
+            N = int(sys.argv[1])
+        # TypeError cannot happen because sys module guarantees input to be string.
+        except ValueError as e:
+            print("N must be a number")
+            exit(1)
+
+        if N < 4:
+            print("N must be at least 4")
+            exit(1)
+
+        return N
+
+
+    def resolver__initialize_state_registries(N: int):
+        """Defines and set default values for the 'truth tables' lists & set"""
+
+        # From the brainstorming we can infer several variables to hold "state".
+        occupied_columns = [False for _ in range(N)]
+        # Using "list creation by repetition" syntax
+        occupied_upwards_diagonals = [False] * (2 * N - 1)
+
+        # For those since the value can be negative we'll use a Set for now.
+        #   Later I'll try to find how to use a truth table like the rest.
+        occupied_downward_diagonals = set()
+
+        # Index will represent line, Value the column for that queen.
+        # Initializing at -1 because 0 is a "valid key" in that context.
+        queens_positions = [-1] * N
+
+        return (
+            occupied_columns,
+            occupied_upwards_diagonals,
+            occupied_downward_diagonals,
+            queens_positions
+        )
+
+
+    def is_safe_position(row_index, col_index):
+        """Checks desired grid position is not used/threatened in any way"""
+        # Check col not locked
+        if occupied_columns[col_index]:
+            return False
+        # Check not across occupied downwards diagonal
+        downwards_diag_code = row_index - col_index
+        if downwards_diag_code in occupied_downward_diagonals:
+            return False
+        # Check not across occupied upwards diagonal
+        upwards_diag_code = row_index + col_index
+        if occupied_upwards_diagonals[upwards_diag_code]:
+            return False
+        return True
+
+
+    def update_state_registries(row_index, col_index, mode):
+        """Updates registries to set or unset a 'lock value'"""
+        downwards_diag_code = row_index - col_index
+        upwards_diag_code = row_index + col_index
+
+        if mode == "unlock":
+            occupied_columns[col_index] = False
+            occupied_downward_diagonals.discard(downwards_diag_code)
+            occupied_upwards_diagonals[upwards_diag_code] = False
+
+        elif mode == "lock":
+            occupied_columns[col_index] = True
+            occupied_downward_diagonals.add(downwards_diag_code)
+            occupied_upwards_diagonals[upwards_diag_code] = True
+
+        else:
+            raise ValueError("Only supported modes are 'lock' and 'unlock'")
+
+
+    def lock_queen_position(row_index, col_index):
+        """Sets the col for a queen in given row and locks related positions"""
+        queens_positions[row_index] = col_index
+        update_state_registries(row_index, col_index, "lock")
+
+
+    def unlock_queen_position(row_index, col_index):
+        """Forgets the col for a given queen and frees related positions"""
+        queens_positions[row_index] = -1
+        update_state_registries(row_index, col_index, "unlock")
+
+
+    # Initializing everything we need to work
+    N = resolver__check_arguments()
+    (   # Beware that variable names match the ones in function, in same order!
+        occupied_columns,
+        occupied_upwards_diagonals,
+        occupied_downward_diagonals,
+        queens_positions
+    ) = resolver__initialize_state_registries(N)
+    solutions = []
+
+    # Starting exploration
+    current_queen = 0
+    while current_queen >= 0:
+        if current_queen == N:
+            # Means we found a valid solution, so save it and backtrack
+            solutions.append([[r, c] for r, c in enumerate(queens_positions)])
+
+            current_queen -= 1
+            update_state_registries(
+                current_queen,
+                queens_positions[current_queen],
+                "unlock"
+            )
+            continue
+
+        # Computing starting positions for search.
+        cr_row_idx = current_queen
+        col_search_start = queens_positions[current_queen] + 1
+
+        # Trying to find a valid col pos for current line insertion.
+        cr_col_idx = next(
+            (idx for idx in range(col_search_start, N)
+            if is_safe_position(cr_row_idx, idx)),
+            None
+        )
+        # Valid position found, we affect and go to next line.
+        if cr_col_idx is not None:
+            lock_queen_position(cr_row_idx, cr_col_idx)
+            current_queen +=1
+        # No valid position found meaning we need to backtrack and try
+        #   with previous queen in next free col pos.
+        else:
+            queens_positions[current_queen] = -1
+            current_queen -= 1
+            if current_queen >= 0:
+                update_state_registries(
+                    current_queen, 
+                    queens_positions[current_queen],
+                    "unlock"
+                )
+
+    for solution in solutions:
+        print(solution)
+
+
+
+print("======= Start using reworked =======")
+nqueens_solver()
+
+
+
+
+
+
+
 
 
 # ===== Task instructions ====
