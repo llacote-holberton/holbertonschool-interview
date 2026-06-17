@@ -7,7 +7,7 @@ import sys  # Required for input grab
 def nqueens_solver():
     """All-in-one N queens puzzle solver, requires an >=4 int as argument"""
 
-    def resolver__check_arguments():
+    def init__ensure_valid_argument():
         """Ensures program is called with proper arguments to resolve puzzle"""
 
         if len(sys.argv) != 2:
@@ -29,7 +29,7 @@ def nqueens_solver():
         return N
 
 
-    def resolver__initialize_state_registries(N: int):
+    def init__setup_state_registries(N: int):
         """Defines and set default values for the 'truth tables' lists & set"""
 
         # From the brainstorming we can infer several variables to hold "state".
@@ -101,13 +101,13 @@ def nqueens_solver():
 
 
     # Initializing everything we need to work
-    N = resolver__check_arguments()
+    N = init__ensure_valid_argument()
     (   # Beware that variable names match the ones in function, in same order!
         occupied_columns,
         occupied_upwards_diagonals,
         occupied_downward_diagonals,
         queens_positions
-    ) = resolver__initialize_state_registries(N)
+    ) = init__setup_state_registries(N)
     solutions = []
 
     # Starting exploration
