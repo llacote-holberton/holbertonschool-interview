@@ -12,8 +12,7 @@ def nqueens_solver():
         """Ensures program is called with proper arguments to resolve puzzle"""
 
         if len(sys.argv) != 2:
-            print("Please give a number for chess size / queens number!")
-            print(sys.argv)
+            print("Usage: nqueens N")
             exit(1)
 
         try:
