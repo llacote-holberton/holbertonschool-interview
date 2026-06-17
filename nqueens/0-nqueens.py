@@ -12,13 +12,13 @@ def nqueens_solver():
         """Ensures program is called with proper arguments to resolve puzzle"""
 
         if len(sys.argv) != 2:
-            print("Please give a number for chess size matching number of queens!")
+            print("Please give a number for chess size / queens number!")
             print(sys.argv)
             exit(1)
 
         try:
             N = int(sys.argv[1])
-        # TypeError cannot happen because sys module guarantees input to be string.
+        # TypeError cannot happen, sys module guarantees input to be string.
         except ValueError as e:
             print("N must be a number")
             exit(1)
@@ -29,11 +29,10 @@ def nqueens_solver():
 
         return N
 
-
     def init__setup_state_registries(N: int):
         """Defines and set default values for the 'truth tables' lists & set"""
 
-        # From the brainstorming we can infer several variables to hold "state".
+        # From the brainstorming we can infer several variables to hold "state"
         occupied_columns = [False for _ in range(N)]
         # Using "list creation by repetition" syntax
         occupied_upwards_diagonals = [False] * (2 * N - 1)
@@ -53,7 +52,6 @@ def nqueens_solver():
             queens_positions
         )
 
-
     def is_safe_position(row_index, col_index):
         """Checks desired grid position is not used/threatened in any way"""
         # Check col not locked
@@ -68,7 +66,6 @@ def nqueens_solver():
         if occupied_upwards_diagonals[upwards_diag_code]:
             return False
         return True
-
 
     def update_state_registries(row_index, col_index, mode):
         """Updates registries to set or unset a 'lock value'"""
@@ -88,18 +85,15 @@ def nqueens_solver():
         else:
             raise ValueError("Only supported modes are 'lock' and 'unlock'")
 
-
     def lock_queen_position(row_index, col_index):
         """Sets the col for a queen in given row and locks related positions"""
         queens_positions[row_index] = col_index
         update_state_registries(row_index, col_index, "lock")
 
-
     def unlock_queen_position(row_index, col_index):
         """Forgets the col for a given queen and frees related positions"""
         queens_positions[row_index] = -1
         update_state_registries(row_index, col_index, "unlock")
-
 
     def backtrack():
         """"""
@@ -112,7 +106,6 @@ def nqueens_solver():
                 queens_positions[current_queen],
                 "unlock"
             )
-
 
     # Initializing everything we need to work
     N = init__ensure_valid_argument()
@@ -140,13 +133,12 @@ def nqueens_solver():
         # Trying to find a valid col pos for current line insertion.
         cr_col_idx = next(
             (idx for idx in range(col_search_start, N)
-            if is_safe_position(cr_row_idx, idx)),
-            None
+                if is_safe_position(cr_row_idx, idx)), None
         )
         # Valid position found, we affect and go to next line.
         if cr_col_idx is not None:
             lock_queen_position(cr_row_idx, cr_col_idx)
-            current_queen +=1
+            current_queen += 1
         # No valid position found meaning we need to backtrack and try
         #   with previous queen in next free col pos.
         else:
@@ -157,22 +149,14 @@ def nqueens_solver():
         print(solution)
 
 
-
 nqueens_solver()
-
-
-
-
-
-
-
 
 
 # ===== Task instructions ====
 # The N queens puzzle is the challenge of placing N non-attacking queens
 # on an N×N chessboard. Write a program that solves the N queens problem.
 # Usage: nqueens N
-# If the user called the program with the wrong number of arguments, 
+# If the user called the program with the wrong number of arguments,
 #   print Usage: nqueens N, followed by a new line, and exit with the status 1
 # where N must be an integer greater or equal to 4
 # If N is not an integer, print N must be a number, followed by a new line,
@@ -221,9 +205,8 @@ nqueens_solver()
 # Every cell of column 0
 # Every cell which computation of "line number - column number" is the same
 #   as in A's cell (0 - 0 = 0), representing the "descending diagonal"
-#   
+#
 # Every cell which computation of "line number + column number" is the same
 #   as in A's cell (0+0).
 # So valid positions for Queen B on line 1 are only cells in columns 2 & 3.
-# (1, 0 is "locked column", 1,1 has "descending diagonal" 0 so locked diagonal).
-#
+# (1, 0 is "locked column", 1,1 has "descending diagonal" 0 so locked diagonal)
