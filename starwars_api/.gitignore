@@ -1,0 +1,3 @@
+# Dependencies brought and managed through Node Package Manager
+# Should NOT be tracked in Git for obvious reasons. :)
+node_modules
