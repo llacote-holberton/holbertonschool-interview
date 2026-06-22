@@ -10,8 +10,7 @@ main();
  * Script's "orchestration function"
  *
  */
-function main()
-{
+function main() {
   if (!validArguments()) process.exit(1);
 
   const movieId = Number(process.argv[2]);
@@ -22,17 +21,14 @@ function main()
  * Just ensures that the script was given valid arguments to work.
  * @returns {Boolean} valid
  */
-function validArguments()
-{
-  if (process.argv.length < 3)
-  {
+function validArguments() {
+  if (process.argv.length < 3) {
     const msgErrorArgMissing = 'Argument "movie id" (integer) is missing, cannot proceed!';
     console.error(msgErrorArgMissing);
     return false;
   }
   const movieId = Number(process.argv[2]);
-  if (Number.isNaN(movieId) || movieId < 1)
-  {
+  if (Number.isNaN(movieId) || movieId < 1) {
     const msgErrorArgUnexploitableInt = 'Movie id must be > 0 integer!';
     console.error(msgErrorArgUnexploitableInt);
     return false;
@@ -40,27 +36,20 @@ function validArguments()
   return true;
 }
 
-
 /**
  * Prints the list of character names if movie exists
  * Returns Undefined if movie not found.
  * @param {Number} movieId
  * @returns Array[Number]|Undefined
  */
-function printMovieCharactersNames(movieId)
-{
+function printMovieCharactersNames(movieId) {
   // @note: going for simplicity, setting the separating / statically in components strings.
   const apiRootUrl = 'https://swapi-api.hbtn.io/api/';
   const moviesEndpoint = 'films/';
   const movieRequestUrl = apiRootUrl + moviesEndpoint + movieId;
 
-  request
-  (
-    movieRequestUrl,
-    function(error, response, body)
-    {
-      if (error)
-      {
+  request( movieRequestUrl, function(error, response, body) {
+      if (error) {
         console.error("Request couldn't be processed properly.");
         return;
       }
@@ -94,8 +83,7 @@ function printMovieCharactersNames(movieId)
   );
 }
 
-function reportMovieRequestError(httpCode)
-{
+function reportMovieRequestError(httpCode) {
   if (httpCode === 404) console.log('Movie not found');
   else console.log('Some internal error occured on API side');
 }
@@ -108,17 +96,11 @@ function reportMovieRequestError(httpCode)
  *   getCharacterName called synchronously but making an asynchronous call within.
  *   ALSO WHY I must also give the 'index' as parameter (otherwise that info is "lost in time")
  */
-function getCharacterName(characterEndpoint, index, characterNamesFillerCallback)
-{
-    request
-    (
-      characterEndpoint,
-      function (error, response, body)
-      {
+function getCharacterName(characterEndpoint, index, characterNamesFillerCallback) {
+    request( characterEndpoint, function (error, response, body) {
         if (!error && response.statusCode === 200) { characterName = JSON.parse(response.body).name; }
         else { characterName = null; }
         characterNamesFillerCallback(index, characterName);
       }
-      
     )
 }
