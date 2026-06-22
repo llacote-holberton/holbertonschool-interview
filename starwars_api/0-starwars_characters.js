@@ -78,9 +78,45 @@ function printMovieCharactersNames(movie_id)
         {
           // We can "chain" the json.parse() method returning a plain Object
           //   with the '.attribute_name' syntax. Provided of course attribute exists!
-          characters_endpoints = JSON.parse(response.body).characters
           // @note: Node 10.4 does NOT support "optional chaining syntax" ('object?.attribute')
-          //characters_endpoints.forEach(???)
+          characters_endpoints = JSON.parse(response.body).characters;
+
+          // Initializing the array which will store character names,
+          //   keeping same "ordered by API character id"
+          characters_names = [];
+          // Thanks to IA, could have never understood by myself we needed to use a counter
+          //   to have "control on when to print"
+          number_of_requests = characters_endpoints.length;
+          counter = 0;
+          // @note: loops on Arrays are made by using builtin forEach, with two variants
+          //   first parameter is mandatory, name given to the *value* of each array item.
+          //   second parameter is *optional* and used to also get the index of currently read item.
+          // CANNOT WORK
+          // characters_endpoints.forEach((endpoint, index) => characters_names[index] = getCharacterName(endpoint))
+          characters_endpoints.forEach
+          (
+            (endpoint, index) => 
+            {
+              getCharacterName
+              (
+                endpoint, 
+                index, 
+                (char_idx, char_name) => 
+                {
+                  // If unsuccessful we know we return null for name
+                  if (char_name) characters_names[char_idx] = char_name;
+                  //console.log(char_name)
+                  // Whether successful or not we must count the achieved request
+                  counter++;
+                  // Kinda brutal but works: this is evaluated on each loop call
+                  // but will only print once the last request has finished.
+                  if (counter === number_of_requests) characters_names.forEach(name => console.log(name))
+
+                }
+              )
+            }
+          )
+          
         }
       }
     }
@@ -94,11 +130,27 @@ function reportMovieRequestError(http_code)
 }
 
 /**
- * @param {Number} character_id
+ * @param {String} character_endpoint
+ * @returns {String} character_name
+ * @note: MUST be written "as a function with callback" because otherwise
+ *   it would just immediately return "undefined" to the caller because
+ *   getCharacterName called synchronously but making an asynchronous call within.
+ *   ALSO WHY I must also give the 'index' as parameter (otherwise that info is "lost in time")
  */
-function getCharacterName(character_id) 
+function getCharacterName(character_endpoint, index, characterNamesFillerCallback)
 {
-    console.log(character_id);
+    characterNameRequest = request
+    (
+      character_endpoint,
+      function (error, response, body)
+      {
+        // This time we start with 'exploitable response'
+        if (!error && response.statusCode === 200) { character_name = JSON.parse(response.body).name; }
+        else { character_name = null; }
+        characterNamesFillerCallback(index, character_name)
+      }
+      
+    )
 }
 
 
@@ -152,4 +204,38 @@ main();
  *   https://dustinpfister.github.io/2021/03/18/nodejs-process-stdout/
  *   Main differences: no automatic EOL (process.write)
  *                     automatic obj to text conversion (console.log)
+ */
+
+
+
+/*
+ * ========== DRAFT / ABANDONED CODE ==========
+ * function getCharacterName(character_endpoint, index, characterNamesFillerCallback)
+{
+    console.log(character_endpoint);
+    characterNameRequest = request
+    (
+      character_endpoint,
+      function (error, response, body)
+      {
+        // This time we start with 'exploitable response'
+        if (!error && response.statusCode === 200)
+        {
+          character_name = JSON.parse(response.body).name;
+          characterNamesFillerCallback(index, character_name)
+        }
+        else
+        {
+          if (error) console.error("Request couldn't be processed properly.");
+          else if (response.statusCode === 404) 
+          {
+            console.log(`Character does not exist for endpoint ${character_endpoint}`)
+          }
+          else console.error('Some error happened on API server side')
+        }
+         characterNamesFillerCallback(index, null)
+      }
+      
+    )
+}
  */
