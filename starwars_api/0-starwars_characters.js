@@ -68,57 +68,59 @@ function printMovieCharactersNames(movie_id)
     {
       // Error param is null if everything went well "in terms of network transaction"
       // (so a response with 404 HTTP code is still a valid response -> 'null error')
-      if (error) console.error("Request couldn't be processed properly.")
-      else 
+      if (error)
       {
-        response_http_code = Number(response.statusCode);
-        console.log(response_http_code);
-        if (response_http_code != 200) reportMovieRequestError(response_http_code)
-        else 
+        console.error("Request couldn't be processed properly.")
+        return;
+      }
+
+      response_http_code = Number(response.statusCode);
+      console.log(response_http_code);
+      if (response_http_code != 200)
+      {
+        reportMovieRequestError(response_http_code);
+        return;
+      }
+
+      // We can "chain" the json.parse() method returning a plain Object
+      //   with the '.attribute_name' syntax. Provided of course attribute exists!
+      // @note: Node 10.4 does NOT support "optional chaining syntax" ('object?.attribute')
+      characters_endpoints = JSON.parse(response.body).characters;
+
+      // Initializing the array which will store character names,
+      //   keeping same "ordered by API character id"
+      characters_names = [];
+      // Thanks to IA, could have never understood by myself we needed to use a counter
+      //   to have "control on when to print"
+      number_of_requests = characters_endpoints.length;
+      counter = 0;
+      // @note: loops on Arrays are made by using builtin forEach, with two variants
+      //   first parameter is mandatory, name given to the *value* of each array item.
+      //   second parameter is *optional* and used to also get the index of currently read item.
+      // CANNOT WORK
+      // characters_endpoints.forEach((endpoint, index) => characters_names[index] = getCharacterName(endpoint))
+      characters_endpoints.forEach
+      (
+        (endpoint, index) => 
         {
-          // We can "chain" the json.parse() method returning a plain Object
-          //   with the '.attribute_name' syntax. Provided of course attribute exists!
-          // @note: Node 10.4 does NOT support "optional chaining syntax" ('object?.attribute')
-          characters_endpoints = JSON.parse(response.body).characters;
-
-          // Initializing the array which will store character names,
-          //   keeping same "ordered by API character id"
-          characters_names = [];
-          // Thanks to IA, could have never understood by myself we needed to use a counter
-          //   to have "control on when to print"
-          number_of_requests = characters_endpoints.length;
-          counter = 0;
-          // @note: loops on Arrays are made by using builtin forEach, with two variants
-          //   first parameter is mandatory, name given to the *value* of each array item.
-          //   second parameter is *optional* and used to also get the index of currently read item.
-          // CANNOT WORK
-          // characters_endpoints.forEach((endpoint, index) => characters_names[index] = getCharacterName(endpoint))
-          characters_endpoints.forEach
+          getCharacterName
           (
-            (endpoint, index) => 
+            endpoint, 
+            index, 
+            (char_idx, char_name) => 
             {
-              getCharacterName
-              (
-                endpoint, 
-                index, 
-                (char_idx, char_name) => 
-                {
-                  // If unsuccessful we know we return null for name
-                  if (char_name) characters_names[char_idx] = char_name;
-                  //console.log(char_name)
-                  // Whether successful or not we must count the achieved request
-                  counter++;
-                  // Kinda brutal but works: this is evaluated on each loop call
-                  // but will only print once the last request has finished.
-                  if (counter === number_of_requests) characters_names.forEach(name => console.log(name))
-
-                }
-              )
+              // If unsuccessful we know we return null for name
+              if (char_name) characters_names[char_idx] = char_name;
+              //console.log(char_name)
+              // Whether successful or not we must count the achieved request
+              counter++;
+              // Kinda brutal but works: this is evaluated on each loop call
+              // but will only print once the last request has finished.
+              if (counter === number_of_requests) characters_names.forEach(name => console.log(name))
             }
           )
-          
         }
-      }
+      )
     }
   );
 }
@@ -185,14 +187,7 @@ main();
  */
 
 
-/** UNUSED because useless we have to "nest" calls whatever happens.
- * Grabs the list of characters from movie id.
- * Returns Undefined if movie not found.
- * @param {Number} movie_id
- * @returns Array[Number]|Undefined
- */
-//function getMovieCharacters(movie_id){}
-
+/** 
 
 /* ========== RESOURCES ==========
  * 1/ REQUESTS:
@@ -237,5 +232,14 @@ main();
       }
       
     )
-}
+}*
+
+
+UNUSED because useless we have to "nest" calls whatever happens.
+ * Grabs the list of characters from movie id.
+ * Returns Undefined if movie not found.
+ * @param {Number} movie_id
+ * @returns Array[Number]|Undefined
+function getMovieCharacters(movie_id){}
+
  */
