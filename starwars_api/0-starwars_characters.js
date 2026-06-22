@@ -1,21 +1,109 @@
+#!/usr/bin/node
+
 
 // Grabbing the "request engine" and setting it as a constant.
 const request = require('request');
 
-my_test_request = request(
-    // First parameter is the url of the page we want to reach
-    'https://www.york.ac.uk/teaching/cws/wws/webpage1.html',
-    // Second parameter is an "anonymous function" which can do
-    //   different things depending on what was received in return
-    //   (valid answer or HTTP error code)
-    // WARNING: you can give whatever names but the order IS IMPOSED
-    //   as request() will always return these informations like this.
-    function (error, response, body ) 
+/**
+ * Script's "orchestration function"
+ *
+ */
+function main()
+{
+  // Exit if script not correctly runned
+  if (!validArguments()) process.exit(1);
+
+  movie_id = Number(process.argv[2]);
+  printMovieCharactersNames(movie_id)
+
+}
+
+
+/**
+ * Just ensures that the script was given valid arguments to work.
+ * @returns {Boolean} valid
+ */
+function validArguments() 
+{
+  // @warning whether runned "directly" or with "node myscript" syntax,
+  // Arg 0 is the interpreter and arg 1 is the script's path, always.
+  if (process.argv.length < 3)
+  {
+    const msg__error__arg_missing = 'Argument "movie id" (integer) is missing, cannot proceed!';
+    console.error(msg__error__arg_missing);
+    return false;
+  }
+  // Trying to convert as a Number directly when reading string input
+  movie_id = Number(process.argv[2]);
+  console.log(movie_id)
+  // Using builtin "is not a number after trying to convert" method of Number class
+  if (Number.isNaN(movie_id) || movie_id < 1)
+  {
+    const msg__error__arg_not_exploitable_int = 'Movie id must be > 0 integer!';
+    console.error(msg__error__arg_not_exploitable_int)
+    return false;
+  }
+  return true;
+}
+
+
+/**
+ * Prints the list of character names if movie exists
+ * Returns Undefined if movie not found.
+ * @param {Number} movie_id
+ * @returns Array[Number]|Undefined
+ */
+function printMovieCharactersNames(movie_id)
+{
+  // @note: going for simplicity, setting the separating / statically in components strings.
+  const api_root_url = 'https://swapi-api.hbtn.io/api/';
+  const movies_endpoint = 'films/';
+  const characters_endpoint = 'characters/';
+  const movie_request_url = api_root_url + movies_endpoint + movie_id;
+
+  names_print_workflow = request
+  (
+    movie_request_url,
+    function(error, response, body) 
     {
-        console.log(error);
-        console.log(response.statusCode);
+      // Error param is null if everything went well "in terms of network transaction"
+      // (so a response with 404 HTTP code is still a valid response -> 'null error')
+      if (error) console.error("Request couldn't be processed properly.")
+      else 
+      {
+        response_http_code = Number(response.statusCode);
+        console.log(response_http_code);
+        if (response_http_code != 200) reportMovieRequestError(response_http_code)
+        else 
+        {
+          // We can "chain" the json.parse() method returning a plain Object
+          //   with the '.attribute_name' syntax. Provided of course attribute exists!
+          characters_endpoints = JSON.parse(response.body).characters
+          // @note: Node 10.4 does NOT support "optional chaining syntax" ('object?.attribute')
+          //characters_endpoints.forEach(???)
+        }
+      }
     }
-)
+  );
+}
+
+function reportMovieRequestError(http_code)
+{
+  if (http_code === 404) console.log("Movie not found")
+  else console.log("Some internal error occured on API side");
+}
+
+/**
+ * @param {Number} character_id
+ */
+function getCharacterName(character_id) 
+{
+    console.log(character_id);
+}
+
+
+
+main();
 
 
 /* ========== BUSINESS GOAL ==========
@@ -45,3 +133,23 @@ my_test_request = request(
  */
 
 
+/** UNUSED because useless we have to "nest" calls whatever happens.
+ * Grabs the list of characters from movie id.
+ * Returns Undefined if movie not found.
+ * @param {Number} movie_id
+ * @returns Array[Number]|Undefined
+ */
+//function getMovieCharacters(movie_id){}
+
+
+/* ========== RESOURCES ==========
+ * 1/ REQUESTS:
+ *   https://www.npmjs.com/package/request
+ * 2/ ARGUMENTS
+ *   https://nodejs.org/docs/latest-v10.x/api/process.html#process_process_argv
+ * 3/ PRINTING TO STD OUTPUT
+ *   https://nodejs.org/learn/command-line/output-to-the-command-line-using-nodejs
+ *   https://dustinpfister.github.io/2021/03/18/nodejs-process-stdout/
+ *   Main differences: no automatic EOL (process.write)
+ *                     automatic obj to text conversion (console.log)
+ */
