@@ -90,17 +90,19 @@ function reportMovieRequestError(httpCode) {
 
 /**
  * @param {String} characterEndpoint
+ * @param {Number} index
+ * @param {Function} characterNamesFillerCallback
  * @returns {String} characterName
  * @note: MUST be written "as a function with callback" because otherwise
  *   it would just immediately return "undefined" to the caller because
  *   getCharacterName called synchronously but making an asynchronous call within.
  *   ALSO WHY I must also give the 'index' as parameter (otherwise that info is "lost in time")
  */
-function getCharacterName(characterEndpoint, index, characterNamesFillerCallback) {
-    request( characterEndpoint, function (error, response, body) {
-        if (!error && response.statusCode === 200) { characterName = JSON.parse(response.body).name; }
-        else { characterName = null; }
-        characterNamesFillerCallback(index, characterName);
-      }
-    )
+function getCharacterName (characterEndpoint, index, characterNamesFillerCallback) {
+  request(characterEndpoint, function (error, response, body) {
+      let characterName = null;
+      if (!error && response.statusCode === 200) { characterName = JSON.parse(body).name; }
+      characterNamesFillerCallback(index, characterName);
+    }
+  )
 }
