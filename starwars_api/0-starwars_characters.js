@@ -66,8 +66,8 @@ function printMovieCharactersNames(movieId)
       }
 
       const responseHttpCode = Number(response.statusCode);
-      if (responseHttpCode != 200)
-      {
+
+      if (responseHttpCode !== 200) {
         reportMovieRequestError(responseHttpCode);
         return;
       }
