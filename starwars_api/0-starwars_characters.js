@@ -1,8 +1,8 @@
 #!/usr/bin/node
 
-
 // Grabbing the "request engine" and setting it as a constant.
 const request = require('request');
+main()
 
 /**
  * Script's "orchestration function"
@@ -13,7 +13,7 @@ function main()
   // Exit if script not correctly runned
   if (!validArguments()) process.exit(1);
 
-  movie_id = Number(process.argv[2]);
+  const movie_id = Number(process.argv[2]);
   printMovieCharactersNames(movie_id);
   // @warning CANNOT BE PUT HERE because exits before asynchronous calls can complete.
   // process.exit(0);
@@ -38,7 +38,6 @@ function validArguments()
   }
   // Trying to convert as a Number directly when reading string input
   movie_id = Number(process.argv[2]);
-  console.log(movie_id)
   // Using builtin "is not a number after trying to convert" method of Number class
   if (Number.isNaN(movie_id) || movie_id < 1)
   {
@@ -78,7 +77,6 @@ function printMovieCharactersNames(movie_id)
       }
 
       response_http_code = Number(response.statusCode);
-      console.log(response_http_code);
       if (response_http_code != 200)
       {
         reportMovieRequestError(response_http_code);
@@ -88,15 +86,17 @@ function printMovieCharactersNames(movie_id)
       // We can "chain" the json.parse() method returning a plain Object
       //   with the '.attribute_name' syntax. Provided of course attribute exists!
       // @note: Node 10.4 does NOT support "optional chaining syntax" ('object?.attribute')
-      characters_endpoints = JSON.parse(response.body).characters;
+      const characters_endpoints = JSON.parse(response.body).characters;
 
       // Initializing the array which will store character names,
       //   keeping same "ordered by API character id"
-      characters_names = [];
+      // @note: counterintuitive: because is an Array we can *mutate its content*
+      // const just prevents affecting another Object to the same name!
+      const characters_names = [];
       // Thanks to IA, could have never understood by myself we needed to use a counter
       //   to have "control on when to print"
-      number_of_requests = characters_endpoints.length;
-      counter = 0;
+      const number_of_requests = characters_endpoints.length;
+      let counter = 0;
       // @note: loops on Arrays are made by using builtin forEach, with two variants
       //   first parameter is mandatory, name given to the *value* of each array item.
       //   second parameter is *optional* and used to also get the index of currently read item.
@@ -157,11 +157,6 @@ function getCharacterName(character_endpoint, index, characterNamesFillerCallbac
       
     )
 }
-
-
-
-main();
-
 
 /* ========== BUSINESS GOAL ==========
  * Write a script that prints all characters of a Star Wars movie:
