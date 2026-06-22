@@ -14,8 +14,11 @@ function main()
   if (!validArguments()) process.exit(1);
 
   movie_id = Number(process.argv[2]);
-  printMovieCharactersNames(movie_id)
-
+  printMovieCharactersNames(movie_id);
+  // @warning CANNOT BE PUT HERE because exits before asynchronous calls can complete.
+  // process.exit(0);
+  // Would need to be put right after the character names printing. But useless because
+  // NodeJS knows when and how to close program automatically.
 }
 
 
