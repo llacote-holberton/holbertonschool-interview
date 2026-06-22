@@ -1,0 +1,16 @@
+{
+  "name": "starwars_api",
+  "version": "1.0.0",
+  "description": "This directory holds exercise on generating programmatically a Pascal's Triangle of size n.",
+  "main": "0-starwars_characters.js",
+  "dependencies": {
+    "request": "^2.88.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
