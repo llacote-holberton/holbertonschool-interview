@@ -1,17 +1,34 @@
 #!/usr/bin/python3
 """Module providing function to compute perimeter of ASCII island map"""
 
+import logging
+
+
+# ===== LOGGER CONFIGURATION =====
+# We explicitely define "message level" and "handler"
+#   directly at our log's level instead of "global" (root).
+log = logging.getLogger('islandPerimeter')
+
+# Using a "global var" to switch level
+dev_mode = True
+if dev_mode:
+    log.setLevel(logging.DEBUG)
+else:
+    log.setLevel(logging.ERROR)
+
+# Setting up handler
+handler = logging.FileHandler("islandPerimeter.log")
+handler.setFormatter(logging.Formatter("%(asctime)s %(message)s"))
+log.addHandler(handler)
+log.propagate = False  # To avoid bubbling up to root and display twice.
+
 
 def island_perimeter(grid) -> int:
-    """Computes the perimeter of an ASCII island"""
-
     size = len(grid)
     if size < 1:
         return 0
 
     perimeter_length = 0
-    # Note: we are guaranteed by "client" that island always
-    #   entirely surrounded by water in the "map drawing"
     for i in range(0, size):
         for j in range(0, size):
             if grid[i][j] == 1:
@@ -20,6 +37,7 @@ def island_perimeter(grid) -> int:
                 for nr, nc in [(-1, 0), (0, +1), (+1, 0), (0, -1)]:
                     # Works because dynamic conversion bool -> int
                     perimeter_length += (grid[i + nr][j + nc] == 0)
+
     return perimeter_length
 
 
