@@ -58,7 +58,7 @@ def makeChange(coins, total) -> int:
     # We start an outer loop which will try to find, for a given value,
     #   the minimum absolute number of coins AND the "best starting coin".
     # 0 is useless to assert, because we need 0 coin.
-    for i in range(1, ceiling):  # Reminder: range excludes higher bound.
+    for i in range(min(coins), ceiling):
         # Starting inner loop to try each coin value and see if it can
         #   allow us to reach a better combination than "i * coins of 1")
         for c in coins:
