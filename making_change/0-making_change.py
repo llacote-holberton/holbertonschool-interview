@@ -31,7 +31,10 @@ def makeChange(coins, total) -> int:
        Return: number of coins.
     """
 
-    if len(coins) < 1 or total <= 0:
+    if len(coins) < 1:
+        return -1
+
+    if total <= 0:
         return 0
 
     if total == 1:
