@@ -32,14 +32,11 @@ def island_perimeter(grid) -> int:
     for i in range(0, size):
         for j in range(0, size):
             if grid[i][j] == 1:
-                # TOP
-                top = grid[i-1][j]
-                right = grid[i][j+1]
-                bottom = grid[i+1][j]
-                left = grid[i][j-1]
-                for neighbour in (top, right, bottom, left):
-                    if neighbour == 0:
-                        perimeter_length += 1
+                # Calculating "offsets" for top/right/bottom/left neighbours
+                # 'nr' = neighbour row, 'nc' = neighbour column
+                for nr, nc in [(-1, 0), (0, +1), (+1, 0), (0, -1)]:
+                    # Works because dynamic conversion bool -> int
+                    perimeter_length += (grid[i + nr][j + nc] == 0)
 
     return perimeter_length
 
@@ -58,3 +55,34 @@ def island_perimeter(grid) -> int:
 # When we find a 1, we must check all four "sides"
 #   (cell above, cell right, cell bottom, cell left)
 #   if that adjacent cell is 0 then it must count in perimeter.
+
+# ========== DRAFTS ==========
+# VERSION 1 writing of the "loop"
+# perimeter_length = 0
+# for i in range(0, size):
+#     for j in range(0, size):
+#         if grid[i][j] == 1:
+#             # TOP
+#             top = grid[i-1][j]
+#             right = grid[i][j+1]
+#             bottom = grid[i+1][j]
+#             left = grid[i][j-1]
+#             for neighbour in (top, right, bottom, left):
+#                 if neighbour == 0:
+#                     perimeter_length += 1
+#
+# VERSION 2 writing of the loop (current version but with comments)
+#     perimeter_length = 0
+    # for i in range(0, size):
+    #     for j in range(0, size):
+    #         if grid[i][j] == 1:
+    #             # Calculating "offsets" for top/right/bottom/left neighbours
+    #             # 'nr' = neighbour row, 'nc' = neighbour column
+    #             for nr, nc in [(-1, 0), (0, +1), (+1, 0), (0, -1)]:
+    #                 # Using double boolean conversion
+    #                 # perimeter_length += int(not bool(grid[i + nr][j + nc]))
+    #                 # Actually useless convert as Py will naturally convert
+    #                 # A boolean value as int when part of an affectation (+=)
+    #                 # perimeter_length += not grid[i + nr][j + nc]
+    #                 # But this is the best, most explicit
+    #                 perimeter_length += (grid[i + nr][j + nc] == 0)
