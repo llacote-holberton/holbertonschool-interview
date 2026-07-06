@@ -1,7 +1,28 @@
 #!/usr/bin/python3
 """Module providing function to compute optimal way to give change"""
 
+import logging
 
+# ===== LOGGER CONFIGURATION =====
+# We explicitely define "message level" and "handler"
+#   directly at our log's level instead of "global" (root).
+log = logging.getLogger('makeChange')
+
+# Using a "global var" to switch level
+dev_mode = True
+if dev_mode:
+    log.setLevel(logging.DEBUG)
+else:
+    log.setLevel(logging.ERROR)
+
+# Setting up handler
+handler = logging.FileHandler("makeChange.log")
+handler.setFormatter(logging.Formatter("%(asctime)s %(message)s"))
+log.addHandler(handler)
+log.propagate = False  # To avoid bubbling up to root and display twice.
+
+
+# ===== MODULE MAIN FUNCTION =====
 def makeChange(coins, total) -> int:
     """
        Given a set of coin, provides optimal way to 'reach' total
@@ -29,16 +50,16 @@ def makeChange(coins, total) -> int:
     # Not sure it's required but just in case.
     best_coin_for_numbers = [None] * (total + 1)
 
-    print("List of coins before sort: ", coins)
+    log.debug("List of coins before sort: %s", coins)
     # Core logic.
     # We must ensure our list of coins is sorted otherwise logic cannot work.
     coins.sort()  # By design we know all are integers, we can sort in-place.
-    print("List of coins after sort: ", coins)
+    log.debug("List of coins after sort: %s", coins)
     # We start an outer loop which will try to find, for a given value,
     #   the minimum absolute number of coins AND the "best starting coin".
     # 0 is useless to assert, because we need 0 coin.
     for i in range(1, ceiling):  # Reminder: range excludes higher bound.
-        # Starting inner loop to try each coin value and see if it can 
+        # Starting inner loop to try each coin value and see if it can
         #   allow us to reach a better combination than "i * coins of 1")
         for c in coins:
             if c <= i:
@@ -51,10 +72,11 @@ def makeChange(coins, total) -> int:
                     # We found a new best combination.
                     best_combinations_for_sequences[i] = combination
                     best_coin_for_numbers[i] = c
-    print(best_combinations_for_sequences)
-    print("Best coins assembly for number")
-    print(best_coin_for_numbers)
-    print(f"Best for {total} is {best_combinations_for_sequences[total]}")
+    log.debug("Minimum number of coins for each value in sequence")
+    log.debug(best_combinations_for_sequences)
+    log.debug("Best 'starting coin' for each value")
+    log.debug(best_coin_for_numbers)
+    log.debug(f"Best for {total} is {best_combinations_for_sequences[total]}")
 
     if (best_combinations_for_sequences[total] == ceiling):
         return -1
