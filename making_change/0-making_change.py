@@ -3,6 +3,7 @@
 
 import logging
 
+
 # ===== LOGGER CONFIGURATION =====
 # We explicitely define "message level" and "handler"
 #   directly at our log's level instead of "global" (root).
@@ -78,7 +79,42 @@ def makeChange(coins, total) -> int:
                         best_combinations_for_sequences[i] = combination
                         best_coin_for_numbers[i] = c
 
+    # WILL CRASH WHATEVER HAPPENS UNLESS we also change the Host System
+    #   configuration to allow Python interpreter to use >8mo.
+    def top_down_method() -> int:
+        from functools import cache
+        import sys
+        # Only increases the "logical limit" within Python configuration,
+        #   still bound by whatever system administrator set as "hard limit"
+        #   for every Python script.
+        sys.setrecursionlimit(200000)
+
+        # This time we go "greedy with backtracking" approach
+        #   so we need biggest first
+        coins.sort(reverse=True)
+
+        @cache
+        # Note: had to require help from IA to get that memoization tip.
+        # We use recursive to dig which is the best combination for each value.
+        def search(remaining):
+            if remaining == 0:
+                return 0
+            if remaining < 0:
+                return ceiling
+            current_best = ceiling
+            for c in coins:
+                # As with other attempt worth trying only if c <= target
+                if c <= remaining:
+                    result = search(remaining - c)
+                    if result != ceiling:
+                        current_best = min(current_best, 1 + result)
+            return current_best
+
+        best_combinations_for_sequences[total] = search(total)
+        print(best_combinations_for_sequences[total])
+
     bottom_up_method()
+    # top_down_method()
     log.debug("Minimum number of coins for each value in sequence")
     log.debug(best_combinations_for_sequences)
     log.debug("Best 'starting coin' for each value")
