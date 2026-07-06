@@ -5,21 +5,30 @@
 def island_perimeter(grid) -> int:
     """Computes the perimeter of an ASCII island"""
 
-    size = len(grid)
-    if size < 1:
+    rows = len(grid)
+    if rows < 1:
+        return 0
+    cols = len(grid[0])
+    if cols < 1:
         return 0
 
     perimeter_length = 0
     # Note: we are guaranteed by "client" that island always
     #   entirely surrounded by water in the "map drawing"
-    for i in range(0, size):
-        for j in range(0, size):
+    for i in range(0, rows):
+        for j in range(0, cols):
             if grid[i][j] == 1:
                 # Calculating "offsets" for top/right/bottom/left neighbours
                 # 'nr' = neighbour row, 'nc' = neighbour column
-                for nr, nc in [(-1, 0), (0, +1), (+1, 0), (0, -1)]:
+                for nr_off, nc_off in [(-1, 0), (0, +1), (+1, 0), (0, -1)]:
                     # Works because dynamic conversion bool -> int
-                    perimeter_length += (grid[i + nr][j + nc] == 0)
+                    nr = i + nr_off
+                    nc = j + nc_off
+                    # Check "out of bounds" (off-map), automatically water
+                    if nr < 0 or nr > rows-1 or nc < 0 or nc > cols-1:
+                        perimeter_length += 1
+                    else:
+                        perimeter_length += (grid[nr][nc] == 0)
     return perimeter_length
 
 
