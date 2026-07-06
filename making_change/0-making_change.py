@@ -13,9 +13,53 @@ def makeChange(coins, total) -> int:
     if len(coins) < 1 or total <= 0:
         return 0
 
-    
+    if total == 1:
+        return 1
 
+    ceiling = total + 1
+    # Array storing the "best solutions of coin combination amount"
+    #   for all values from 1 to total.
+    # To allow our algorithm to work (requires math comparison)
+    #   we set the default value to a "ceiling" which must NOT be confused
+    #   with an actual computed solution. So to be sure we set it to "total+1"
+    # We must use this special writing because we need cell 0 to have 0.
+    best_combinations_for_sequences = [0] + [ceiling] * total
+    # Because I like to be thorough although not strictly required by exo.
+    # Note total + 1 to have the same number of cells as previous array.
+    # Not sure it's required but just in case.
+    best_coin_for_numbers = [None] * (total + 1)
 
+    print("List of coins before sort: ", coins)
+    # Core logic.
+    # We must ensure our list of coins is sorted otherwise logic cannot work.
+    coins.sort()  # By design we know all are integers, we can sort in-place.
+    print("List of coins after sort: ", coins)
+    # We start an outer loop which will try to find, for a given value,
+    #   the minimum absolute number of coins AND the "best starting coin".
+    # 0 is useless to assert, because we need 0 coin.
+    for i in range(1, ceiling):  # Reminder: range excludes higher bound.
+        # Starting inner loop to try each coin value and see if it can 
+        #   allow us to reach a better combination than "i * coins of 1")
+        for c in coins:
+            if c <= i:
+                # Put "1 coin of c" and "number of coins required
+                #   to shore up the difference"
+                # Will only be strictly inferior if there was an
+                #   existing combination in that "complement cell"
+                combination = 1 + best_combinations_for_sequences[i - c]
+                if combination < best_combinations_for_sequences[i]:
+                    # We found a new best combination.
+                    best_combinations_for_sequences[i] = combination
+                    best_coin_for_numbers[i] = c
+    print(best_combinations_for_sequences)
+    print("Best coins assembly for number")
+    print(best_coin_for_numbers)
+    print(f"Best for {total} is {best_combinations_for_sequences[total]}")
+
+    if (best_combinations_for_sequences[total] == ceiling):
+        return -1
+    else:
+        return best_combinations_for_sequences[total]
 
 
 # ========== INSTRUCTIONS ==========
