@@ -58,23 +58,27 @@ def makeChange(coins, total) -> int:
     # We must ensure our list of coins is sorted otherwise logic cannot work.
     coins.sort()  # By design we know all are integers, we can sort in-place.
     log.debug("List of coins after sort: %s", coins)
-    # We start an outer loop which will try to find, for a given value,
-    #   the minimum absolute number of coins AND the "best starting coin".
-    # 0 is useless to assert, because we need 0 coin.
-    for i in range(min(coins), ceiling):
-        # Starting inner loop to try each coin value and see if it can
-        #   allow us to reach a better combination than "i * coins of 1")
-        for c in coins:
-            if c <= i:
-                # Put "1 coin of c" and "number of coins required
-                #   to shore up the difference"
-                # Will only be strictly inferior if there was an
-                #   existing combination in that "complement cell"
-                combination = 1 + best_combinations_for_sequences[i - c]
-                if combination < best_combinations_for_sequences[i]:
-                    # We found a new best combination.
-                    best_combinations_for_sequences[i] = combination
-                    best_coin_for_numbers[i] = c
+
+    def bottom_up_method() -> int:
+        # We start an outer loop which will try to find, for a given value,
+        #   the minimum absolute number of coins AND the "best starting coin".
+        # 0 is useless to assert, because we need 0 coin.
+        for i in range(min(coins), ceiling):
+            # Starting inner loop to try each coin value and see if it can
+            #   allow us to reach a better combination than "i * coins of 1")
+            for c in coins:
+                if c <= i:
+                    # Put "1 coin of c" and "number of coins required
+                    #   to shore up the difference"
+                    # Will only be strictly inferior if there was an
+                    #   existing combination in that "complement cell"
+                    combination = 1 + best_combinations_for_sequences[i - c]
+                    if combination < best_combinations_for_sequences[i]:
+                        # We found a new best combination.
+                        best_combinations_for_sequences[i] = combination
+                        best_coin_for_numbers[i] = c
+
+    bottom_up_method()
     log.debug("Minimum number of coins for each value in sequence")
     log.debug(best_combinations_for_sequences)
     log.debug("Best 'starting coin' for each value")
