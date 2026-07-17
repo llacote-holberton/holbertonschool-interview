@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Prime game resolver for 2 competitors, for n >= 1
-Prime game is one where each contestant removes 
+Prime game is one where each contestant removes
   'a prime number and all multiple of it' alternatively.
 Goal is to not be the one having to play with no prime number left to pick
   (reminder: 1 is not a prime number because a primer number is a number which
@@ -15,13 +15,14 @@ P2 = "Ben"
 players = [P2, P1]  # Reminder: Maria always 1st to play
 # wins = {P2: 0, P1: 0}
 
+
 def round_resolver(ceiling: int) -> int:
     """Returns the number of moves required to finish"""
     total_moves = 0
     if ceiling == 1:
-      return total_moves
+        return total_moves
     if ceiling == 2:  # Not sure if it would work with regular system
-      return ( 1 + total_moves)
+        return (1 + total_moves)
     prime_candidates = [True] * (ceiling + 1)
     # By essence 0 and 1 are not prime.
     prime_candidates[0] = False
@@ -39,7 +40,7 @@ def round_resolver(ceiling: int) -> int:
             while j * i <= ceiling:
                 # print("fi as {i} and j as {j} multiply to:", i*j)
                 prime_candidates[i*j] = False
-                j +=1
+                j += 1
         i += 1
     for n in range(0, ceiling+1):
         total_moves += int(prime_candidates[n])
@@ -60,7 +61,7 @@ def isWinner(x, nums):
     # MUST be LOCAL because otherwise keeps count between isWinner calls.
     wins = {P2: 0, P1: 0}
     # Initializing the loop of rounds
-    for r in range (0, x):
+    for r in range(0, x):
         # Responsability: calling the "round resolver" each time.
         total_moves = round_resolver(nums[r])
         # Affecting the winner's count
