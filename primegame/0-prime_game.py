@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Prime game resolver for 2 competitors, for n >= 2
+Prime game resolver for 2 competitors, for n >= 1
 Prime game is one where each contestant removes 
   'a prime number and all multiple of it' alternatively.
 Goal is to not be the one having to play with no prime number left to pick
@@ -8,8 +8,61 @@ Goal is to not be the one having to play with no prime number left to pick
    can only be divided by two different divisors: 1 and itself).
 """
 
+# NOTE: order chosen specifically, and counter-intuitively, because will
+#   shorten the piece of code "returning the name of the winner"
+players = ["Ben", "Maria"]  # Reminder: Maria always 1st to play
+rounds_won_by_ben = 0
+rounds_won_by_maria = 0
 
 
+def round_resolver(ceiling: int) -> int:
+    """Returns the number of moves required to finish"""
+    total_moves = 0
+    if ceiling == 1:
+      return total_moves
+    if ceiling == 2:  # Not sure if it would work with regular system
+      return ( 1 + total_moves)
+    prime_candidates = [True] * (ceiling + 1)
+    # By essence 0 and 1 are not prime.
+    prime_candidates[0] = False
+    prime_candidates[1] = False
+    i = 2
+    # We simulate "square root check" by upgrading the while condition
+    while i * i <= ceiling:
+        # If True means must be a prime number
+        if prime_candidates[i]:
+            print("Prime number confirmed: ", i)
+            # So we can make a valid move let's count it.
+            total_moves += 1
+            # Then we must "mark as composed" all its multiple
+            j = 2
+            while j * i <= ceiling:
+                print("fi as {i} and j as {j} multiply to:", i*j)
+                prime_candidates[i*j] = False
+                j +=1
+        i += 1
+    return total_moves
+
+
+def victory_resolver(total_moves: int) -> None:
+    """Determines if first or second player wins and affects victory"""
+    pass
+
+
+def isWinner(x, nums):
+    """Simulates the primegame of x rounds each using the next int from nums
+        to determine the winner, if any (equality on rounds won = no winner).
+    """
+
+    # Initializing the loop of rounds
+    # Responsability: calling the "round resolver" each time.
+    # Affecting the winner's count
+    # Comparing number of wins and returning winner.
+
+
+if __name__ == "__main__":
+    print("For 2 should be 1 move(s): ", round_resolver(2))
+    print("For 3 should be 2 move(s): ", round_resolver(3))
 
 
 # ========== BRAINSTORM ==========
