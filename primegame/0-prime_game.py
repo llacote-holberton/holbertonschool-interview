@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """
 Prime game resolver for 2 competitors, for n >= 1
 Prime game is one where each contestant removes
