@@ -11,8 +11,7 @@ Goal is to not be the one having to play with no prime number left to pick
 # NOTE: order chosen specifically, and counter-intuitively, because will
 #   shorten the piece of code "returning the name of the winner"
 players = ["Ben", "Maria"]  # Reminder: Maria always 1st to play
-rounds_won_by_ben = 0
-rounds_won_by_maria = 0
+wins = {"Ben": 0, "Maria": 0}
 
 
 def round_resolver(ceiling: int) -> int:
@@ -48,7 +47,8 @@ def round_resolver(ceiling: int) -> int:
 
 def victory_resolver(total_moves: int) -> None:
     """Determines if first or second player wins and affects victory"""
-    pass
+    winner = players[total_moves % 2]
+    wins[winner] += 1
 
 
 def isWinner(x, nums):
@@ -67,7 +67,11 @@ if __name__ == "__main__":
     print("For 3 should be 2 move(s): ", round_resolver(3))
     print("For 12 should be (2/4/6/8/10/12) + (3/9) + 5 + 11 so 5: ",
           round_resolver(12))
-
+    print(victory_resolver(0))
+    print(victory_resolver(1))
+    print(victory_resolver(3))
+    print(victory_resolver(5))
+    print("After 4 rounds with 3 Maria victories counts are: ", wins)
 
 # ========== BRAINSTORM ==========
 # The game revolves about a set of numbers, which is the integer sequence
