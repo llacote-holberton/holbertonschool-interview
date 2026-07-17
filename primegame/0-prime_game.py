@@ -19,7 +19,7 @@ players = [P2, P1]  # Reminder: Maria always 1st to play
 def round_resolver(ceiling: int) -> int:
     """Returns the number of moves required to finish"""
     total_moves = 0
-    if ceiling == 1:
+    if ceiling <= 1:
         return total_moves
     if ceiling == 2:  # Not sure if it would work with regular system
         return (1 + total_moves)
