@@ -33,7 +33,7 @@ def round_resolver(ceiling: int) -> int:
         if prime_candidates[i]:
             print("Prime number confirmed: ", i)
             # So we can make a valid move let's count it.
-            total_moves += 1
+            # total_moves += 1
             # Then we must "mark as composed" all its multiple
             j = 2
             while j * i <= ceiling:
@@ -41,6 +41,8 @@ def round_resolver(ceiling: int) -> int:
                 prime_candidates[i*j] = False
                 j +=1
         i += 1
+    for n in range(0, ceiling+1):
+        total_moves += int(prime_candidates[n])
     return total_moves
 
 
@@ -63,6 +65,8 @@ def isWinner(x, nums):
 if __name__ == "__main__":
     print("For 2 should be 1 move(s): ", round_resolver(2))
     print("For 3 should be 2 move(s): ", round_resolver(3))
+    print("For 12 should be (2/4/6/8/10/12) + (3/9) + 5 + 11 so 5: ",
+          round_resolver(12))
 
 
 # ========== BRAINSTORM ==========
