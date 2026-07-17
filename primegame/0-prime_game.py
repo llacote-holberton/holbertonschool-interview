@@ -10,9 +10,10 @@ Goal is to not be the one having to play with no prime number left to pick
 
 # NOTE: order chosen specifically, and counter-intuitively, because will
 #   shorten the piece of code "returning the name of the winner"
-players = ["Ben", "Maria"]  # Reminder: Maria always 1st to play
-wins = {"Ben": 0, "Maria": 0}
-
+P1 = "Maria"
+P2 = "Ben"
+players = [P2, P1]  # Reminder: Maria always 1st to play
+# wins = {P2: 0, P1: 0}
 
 def round_resolver(ceiling: int) -> int:
     """Returns the number of moves required to finish"""
@@ -30,13 +31,13 @@ def round_resolver(ceiling: int) -> int:
     while i * i <= ceiling:
         # If True means must be a prime number
         if prime_candidates[i]:
-            print("Prime number confirmed: ", i)
+            # print("Prime number confirmed: ", i)
             # So we can make a valid move let's count it.
             # total_moves += 1
             # Then we must "mark as composed" all its multiple
             j = 2
             while j * i <= ceiling:
-                print("fi as {i} and j as {j} multiply to:", i*j)
+                # print("fi as {i} and j as {j} multiply to:", i*j)
                 prime_candidates[i*j] = False
                 j +=1
         i += 1
@@ -45,33 +46,46 @@ def round_resolver(ceiling: int) -> int:
     return total_moves
 
 
-def victory_resolver(total_moves: int) -> None:
-    """Determines if first or second player wins and affects victory"""
-    winner = players[total_moves % 2]
-    wins[winner] += 1
+# Made obsolete by the fact wins counters must be isWinner inner variables.
+# def victory_resolver(total_moves: int) -> None:
+#     """Determines if first or second player wins and affects victory"""
+#     winner = players[total_moves % 2]
+#     wins[winner] += 1
 
 
 def isWinner(x, nums):
     """Simulates the primegame of x rounds each using the next int from nums
         to determine the winner, if any (equality on rounds won = no winner).
     """
-
+    # MUST be LOCAL because otherwise keeps count between isWinner calls.
+    wins = {P2: 0, P1: 0}
     # Initializing the loop of rounds
-    # Responsability: calling the "round resolver" each time.
-    # Affecting the winner's count
+    for r in range (0, x):
+        # Responsability: calling the "round resolver" each time.
+        total_moves = round_resolver(nums[r])
+        # Affecting the winner's count
+        winner = players[total_moves % 2]
+        wins[winner] += 1
     # Comparing number of wins and returning winner.
+    if wins[P2] == wins[P1]:
+        return None
+    elif wins[P2] < wins[P1]:
+        return players[1]
+    else:
+        return players[0]
 
 
 if __name__ == "__main__":
-    print("For 2 should be 1 move(s): ", round_resolver(2))
-    print("For 3 should be 2 move(s): ", round_resolver(3))
-    print("For 12 should be (2/4/6/8/10/12) + (3/9) + 5 + 11 so 5: ",
-          round_resolver(12))
-    print(victory_resolver(0))
-    print(victory_resolver(1))
-    print(victory_resolver(3))
-    print(victory_resolver(5))
-    print("After 4 rounds with 3 Maria victories counts are: ", wins)
+    # print("For 2 should be 1 move(s): ", round_resolver(2))
+    # print("For 3 should be 2 move(s): ", round_resolver(3))
+    # print("For 12 should be (2/4/6/8/10/12) + (3/9) + 5 + 11 so 5: ",
+    #       round_resolver(12))
+    # print(victory_resolver(0))
+    # print(victory_resolver(1))
+    # print(victory_resolver(3))
+    # print(victory_resolver(5))
+    # print("After 4 rounds with 3 Maria victories counts are: ", wins)
+    pass
 
 # ========== BRAINSTORM ==========
 # The game revolves about a set of numbers, which is the integer sequence
